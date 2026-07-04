@@ -711,11 +711,11 @@ const Home = React.memo(() => {
               >
                 <div className="absolute inset-0 bg-gradient-to-b from-purple-500/5 to-transparent rounded-3xl -z-10" />
                 {[
-                  { title: "Managing Team", detail: "Operations & Strategy" },
-                  { title: "Technical Team", detail: "Devs & Engineers" },
-                  { title: "Designing Team", detail: "UI/UX & Graphics" },
-                  { title: "Social Media Team", detail: "Marketing & Growth" },
-                  { title: "Shooting Team", detail: "Media & Video Production" },
+                  { title: "Managing Team",    detail: "Operations & Strategy",      category: "Managing Team" },
+                  { title: "Technical Team",    detail: "Devs & Engineers",           category: "Technical Team" },
+                  { title: "Designing Team",    detail: "UI/UX & Graphics",           category: "Designing Team" },
+                  { title: "Social Media Team", detail: "Marketing & Growth",         category: "Social Media" },
+                  { title: "Shooting Team",     detail: "Media & Video Production",   category: "Shooting Team" },
                 ].map((team, i) => (
                   <motion.div
                     key={i}
@@ -723,7 +723,7 @@ const Home = React.memo(() => {
                     whileHover={{ y: -6, scale: 1.02, borderColor: "rgba(168, 85, 247, 0.5)", backgroundColor: "rgba(30, 41, 59, 0.8)", boxShadow: "0 10px 25px rgba(168, 85, 247, 0.2)" }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                     className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 flex items-center justify-between group transition-colors duration-300 cursor-pointer"
-                    onClick={() => navigate('/team')}
+                    onClick={() => navigate(`/team?category=${encodeURIComponent(team.category)}`)}
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center font-bold text-xl text-white group-hover:bg-purple-500 transition-colors duration-200">

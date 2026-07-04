@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import TeamCard from '../components/TeamCard';
 import { Loader2, AlertCircle, Search, X, Linkedin, Github, User, Info, ExternalLink } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../api';
 
 // Static Imports of All 24 High-Resolution Profile Pictures
@@ -57,6 +58,7 @@ const shuffleAndAssignOrder = (list) => {
 };
 
 const Team = () => {
+  const [searchParams] = useSearchParams();
   const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(false);
@@ -442,6 +444,12 @@ const Team = () => {
     };
     load();
   }, [MOCK_TEAM]);
+
+  // Read ?category= from URL and pre-select the matching filter
+  useEffect(() => {
+    const cat = searchParams.get('category');
+    if (cat) setSelectedCategory(cat);
+  }, [searchParams]);
 
   // Categories list based on updated club sections
   const categories = useMemo(() => [
