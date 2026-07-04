@@ -93,7 +93,7 @@ const About = () => {
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
             variants={staggerContainerVariants}
-            className="bg-slate-950/45 backdrop-blur-xl border border-white/10 rounded-[3rem] p-8 md:p-12 lg:p-16 flex flex-col lg:flex-row gap-12 items-center group hover:border-cyan-500/30 transition-all shadow-[0_12px_45px_rgba(0,0,0,0.5)] relative overflow-hidden"
+            className="glass-card rounded-[3rem] p-8 md:p-12 lg:p-16 flex flex-col lg:flex-row gap-12 items-center group relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-[80px] -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-150" />
             <motion.div variants={fadeInUpVariants} className="lg:w-1/2 space-y-6 relative z-10">
@@ -117,8 +117,8 @@ const About = () => {
               ].map((b, i) => (
                 <motion.div
                   key={i}
-                  whileHover={{ y: -6, borderColor: "rgba(6, 182, 212, 0.4)", backgroundColor: "rgba(15, 23, 42, 0.75)", boxShadow: "0 0 25px rgba(6, 182, 212, 0.15)" }}
-                  className="bg-slate-950/40 backdrop-blur-md border border-white/10 p-6 rounded-3xl transition-all duration-300 flex flex-col items-center text-center shadow-lg hover:shadow-cyan-500/10 cursor-default"
+                  whileHover={{ y: -6 }}
+                  className="glass-card p-6 rounded-3xl flex flex-col items-center text-center cursor-default"
                 >
                    <div className="mb-4 transform group-hover:scale-110 transition-transform duration-300">{b.icon}</div>
                    <h4 className="text-3xl font-black text-white mb-1">{b.val}</h4>

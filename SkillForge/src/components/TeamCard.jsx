@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Github, Linkedin } from 'lucide-react';
+import { Github, Linkedin, Globe } from 'lucide-react';
 
 const COLORS = [
   'from-blue-600 to-cyan-500',
@@ -10,7 +10,7 @@ const COLORS = [
   'from-rose-600 to-red-500',
 ];
 
-const TeamCard = React.memo(({ name, role, domain, imageUrl, linkedin, github }) => {
+const TeamCard = React.memo(({ name, role, domain, imageUrl, linkedin, github, otherLinks, objectPosition, onClick }) => {
   const color = COLORS[(name?.charCodeAt(0) || 0) % COLORS.length];
   const initials = name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || '?';
 
@@ -20,40 +20,44 @@ const TeamCard = React.memo(({ name, role, domain, imageUrl, linkedin, github })
 
   return (
     <motion.div
-      whileHover={{ y: -6 }}
-      className="group glass-card rounded-2xl overflow-hidden hover:border-blue-500/50 transition-colors duration-200"
+      whileHover={{ y: -6, scale: 1.01 }}
+      onClick={onClick}
+      className="group glass-card rounded-2xl overflow-hidden border border-white/5 hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] transition-all duration-300 cursor-pointer flex flex-col h-full"
     >
       {/* Avatar */}
-      <div className="h-52 relative overflow-hidden">
+      <div className="h-80 relative overflow-hidden flex-shrink-0">
         {displayImage ? (
           <img
             src={displayImage}
             alt={name}
-            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+            style={{ objectPosition: objectPosition || 'center' }}
+            loading="lazy"
           />
         ) : (
           <div className={`w-full h-full bg-gradient-to-br ${color} flex items-center justify-center`}>
             <span className="text-5xl font-black text-white/30 select-none">{initials}</span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-85" />
       </div>
 
       {/* Info */}
-      <div className="p-5 -mt-6 relative z-10">
-        <h3 className="text-lg font-bold text-white">{name}</h3>
-        <p className="text-blue-400 text-sm font-medium">{role}</p>
-        {domain && <p className="text-slate-500 text-xs mt-0.5">{domain}</p>}
+      <div className="p-5 -mt-6 relative z-10 bg-slate-950/40 backdrop-blur-md rounded-b-2xl border-t border-white/5 flex flex-col flex-grow justify-between">
+        <div>
+          <h3 className="text-lg font-bold text-white group-hover:text-cyan-400 transition-colors duration-200">{name}</h3>
+          {domain && <p className="text-cyan-400 text-sm font-medium mt-0.5">{domain}</p>}
+        </div>
 
         {/* Social links */}
-        {(linkedin || github) && (
-          <div className="flex gap-3 mt-4">
+        {(linkedin || github || (otherLinks && otherLinks.length > 0)) && (
+          <div className="flex flex-wrap gap-4 mt-4" onClick={(e) => e.stopPropagation()}>
             {linkedin && (
               <a
                 href={linkedin}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-blue-400 transition-colors"
+                className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-cyan-400 transition-colors"
               >
                 <Linkedin size={14} /> LinkedIn
               </a>
@@ -68,6 +72,17 @@ const TeamCard = React.memo(({ name, role, domain, imageUrl, linkedin, github })
                 <Github size={14} /> GitHub
               </a>
             )}
+            {otherLinks && otherLinks.map((link, idx) => (
+              <a
+                key={idx}
+                href={link.url}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-cyan-400 transition-colors"
+              >
+                <Globe size={14} /> {link.label}
+              </a>
+            ))}
           </div>
         )}
       </div>

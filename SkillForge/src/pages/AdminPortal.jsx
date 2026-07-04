@@ -349,6 +349,10 @@ const EventsTab = () => {
   const [data, setData]           = useState([]);
   const [loading, setLoading]     = useState(true);
   const [search, setSearch]       = useState("");
+  const [showForm, setShowForm]   = useState(false);
+  const [form, setForm]           = useState({ title: "", description: "", date: "", time: "", venue: "", category: "Workshop", capacity: "50", registrationLink: "" });
+  const [saving, setSaving]       = useState(false);
+  const [formError, setFormError] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -364,6 +368,27 @@ const EventsTab = () => {
     const res = await authFetch(`/events/${id}`, { method: "DELETE" });
     if (res.error) return alert(res.error);
     setData((d) => d.filter((e) => e.id !== id));
+  };
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    setFormError("");
+    setSaving(true);
+    try {
+      const payload = { ...form, capacity: Number(form.capacity) || 50 };
+      const res = await authFetch("/events", { method: "POST", body: JSON.stringify(payload) });
+      if (res.event) {
+        setData((d) => [res.event, ...d]);
+        setShowForm(false);
+        setForm({ title: "", description: "", date: "", time: "", venue: "", category: "Workshop", capacity: "50", registrationLink: "" });
+      } else {
+        setFormError(res.error || res.details?.[0]?.msg || JSON.stringify(res));
+      }
+    } catch {
+      setFormError("Network error. Is the backend running?");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const filtered = data.filter((e) => (e.title || "").toLowerCase().includes(search.toLowerCase()));
@@ -382,9 +407,49 @@ const EventsTab = () => {
     </tr>
   ));
 
+  const FIELDS = [
+    { key: "title",            label: "Title",            type: "text",   required: true },
+    { key: "date",             label: "Date",             type: "date",   required: true },
+    { key: "time",             label: "Time",             type: "time",   required: false },
+    { key: "venue",            label: "Venue",            type: "text",   required: true },
+    { key: "category",         label: "Category",         type: "text",   required: true },
+    { key: "capacity",         label: "Capacity",         type: "number", required: false },
+    { key: "registrationLink", label: "Google Form Link", type: "url",    required: true },
+  ];
+
   return (
     <div className="space-y-4">
-      <TableShell title="Events" cols={["Title", "Category", "Date", "Registered", "Actions"]} rows={rows} loading={loading} search={search} setSearch={setSearch} searchPlaceholder="Search events..." />
+      {showForm && (
+        <div className="bg-[#1e293b]/80 border border-cyan-500/30 rounded-2xl p-6 shadow-xl">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-white">Create New Event</h3>
+            <button onClick={() => setShowForm(false)}><X className="text-slate-400 hover:text-white" /></button>
+          </div>
+          <form onSubmit={handleCreate} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {FIELDS.map(({ key, label, type, required }) => (
+              <div key={key} className="space-y-1">
+                <label className="text-xs text-slate-400 font-semibold uppercase">{label}</label>
+                <input type={type} required={required} value={form[key]}
+                  onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+                  className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-all text-sm" />
+              </div>
+            ))}
+            <div className="sm:col-span-2 space-y-1">
+              <label className="text-xs text-slate-400 font-semibold uppercase">Description</label>
+              <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3}
+                className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-all text-sm resize-none" />
+            </div>
+            {formError && <div className="sm:col-span-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">{formError}</div>}
+            <div className="sm:col-span-2 flex gap-3 justify-end">
+              <button type="button" onClick={() => setShowForm(false)} className="px-6 py-2.5 rounded-xl bg-slate-700 text-slate-300 font-bold text-sm">Cancel</button>
+              <button type="submit" disabled={saving} className="px-6 py-2.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-sm flex items-center gap-2">
+                {saving ? <Loader2 className="animate-spin w-4 h-4" /> : <Check className="w-4 h-4" />} Create Event
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+      <TableShell title="Events" cols={["Title", "Category", "Date", "Registered", "Actions"]} rows={rows} loading={loading} onAdd={() => setShowForm(true)} addLabel="New Event" search={search} setSearch={setSearch} searchPlaceholder="Search events..." />
     </div>
   );
 };

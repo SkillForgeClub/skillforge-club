@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Settings, BrainCircuit, Rocket, BookOpen, Calendar, Users, MessageSquare, LogIn, ChevronRight, CheckCircle2, ChevronDown, MonitorPlay, Code2, Sparkles, Mail, Phone, MapPin, Send, Code, Cpu, Smartphone, AlertCircle } from 'lucide-react';
+import { Settings, BrainCircuit, Rocket, BookOpen, Calendar, Users, MessageSquare, LogIn, ChevronRight, CheckCircle2, ChevronDown, MonitorPlay, Code2, Sparkles, Mail, Phone, MapPin, Send, Code, Cpu, Smartphone } from 'lucide-react';
 import skillForgeLogo from '../assets/logo.png';
 import campusBg from '../assets/campus.png';
 
@@ -437,7 +437,7 @@ const Home = React.memo(() => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -15 }}
                       transition={{ duration: 0.35, ease: "easeOut" }}
-                      className="bg-slate-950/45 backdrop-blur-xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl p-6 md:p-8 flex flex-col md:flex-row gap-8 h-full"
+                      className="glass-card rounded-[2.5rem] overflow-hidden shadow-2xl p-6 md:p-8 flex flex-col md:flex-row gap-8 h-full"
                     >
                       {/* Left Column (Image) */}
                       <div className="w-full md:w-1/2 relative aspect-video md:aspect-square lg:aspect-video rounded-3xl overflow-hidden border border-white/5 shrink-0 group/img">
@@ -579,7 +579,7 @@ const Home = React.memo(() => {
 
                     {/* Node details card */}
                     <div 
-                      className="bg-slate-950/45 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 transition-all duration-300 shadow-xl shadow-black/25 flex flex-col justify-between flex-grow h-full border-t border-t-white/15"
+                      className="glass-card rounded-[2rem] p-6 shadow-xl shadow-black/25 flex flex-col justify-between flex-grow h-full border-t border-t-white/15"
                     >
                       <div>
                         <h3 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors duration-200">{domain.title}</h3>
@@ -644,8 +644,8 @@ const Home = React.memo(() => {
                     <motion.div
                       key={i}
                       variants={fadeInUpVariants}
-                      whileHover={{ y: -4, borderColor: "rgba(59, 130, 246, 0.5)", backgroundColor: "rgba(30, 41, 59, 0.8)", boxShadow: "0 4px 20px rgba(59, 130, 246, 0.15)" }}
-                      className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 transition-all duration-200 cursor-pointer"
+                      whileHover={{ y: -4 }}
+                      className="p-6 rounded-3xl glass-card cursor-pointer"
                       onClick={() => window.location.href = '/events'}
                     >
                       <div className="flex items-start justify-between">
@@ -667,8 +667,8 @@ const Home = React.memo(() => {
                     <motion.div
                       key={i}
                       variants={fadeInUpVariants}
-                      whileHover={{ y: -4, borderColor: "rgba(59, 130, 246, 0.5)", backgroundColor: "rgba(30, 41, 59, 0.8)", boxShadow: "0 4px 20px rgba(59, 130, 246, 0.15)" }}
-                      className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 transition-all duration-200 cursor-pointer"
+                      whileHover={{ y: -4 }}
+                      className="p-6 rounded-3xl glass-card cursor-pointer"
                       onClick={() => window.location.href = '/events'}
                     >
                       <div className="flex items-start justify-between">
@@ -709,13 +709,13 @@ const Home = React.memo(() => {
                   { title: "Technical Team", detail: "Devs & Engineers" },
                   { title: "Designing Team", detail: "UI/UX & Graphics" },
                   { title: "Social Media Team", detail: "Marketing & Growth" },
-                  { title: "Shooting & Editing Team", detail: "Media & Video Production" },
+                  { title: "Shooting Team", detail: "Media & Video Production" },
                 ].map((team, i) => (
                   <motion.div
                     key={i}
                     variants={fadeInUpVariants}
-                    whileHover={{ y: -4, borderColor: "rgba(168, 85, 247, 0.5)", backgroundColor: "rgba(30, 41, 59, 0.8)", boxShadow: "0 4px 20px rgba(168, 85, 247, 0.15)" }}
-                    className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 flex items-center justify-between group transition-all duration-200 cursor-pointer"
+                    whileHover={{ y: -4 }}
+                    className="p-6 rounded-3xl glass-card flex items-center justify-between group cursor-pointer"
                     onClick={() => window.location.href = '/team'}
                   >
                     <div className="flex items-center gap-4">

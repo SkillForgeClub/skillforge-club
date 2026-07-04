@@ -5,29 +5,14 @@ import { sendWelcomeEmail, sendOtpEmail } from "../utils/mailer.js";
 
 const otpStore = new Map(); // { email -> { otp, expiresAt } }
 
-// Checks every account table (students, mentors, admins, and the legacy/shared
-// "users" table) for a matching email so duplicate accounts can't slip through
-// via a role or table that register()/sendOtp() previously didn't look at.
-const findExistingAccountByEmail = async (email) => {
-  const tables = ["students", "mentors", "admins", "users"];
-  const results = await Promise.all(
-    tables.map((table) =>
-      supabase.from(table).select("id").ilike("email", email).limit(1).maybeSingle()
-    )
-  );
-  return results.some(({ data }) => !!data);
-};
-
-const ACCOUNT_EXISTS_MESSAGE = "Account already exists. Please login.";
-
 export const sendOtp = async (req, res, next) => {
   try {
     let { email } = req.body;
     if (!email) return res.status(400).json({ error: "Email is required" });
     email = email.toLowerCase().trim();
 
-    const exists = await findExistingAccountByEmail(email);
-    if (exists) return res.status(409).json({ error: ACCOUNT_EXISTS_MESSAGE });
+    const { data: existing } = await supabase.from("users").select("id").eq("email", email).single();
+    if (existing) return res.status(409).json({ error: "Email already registered" });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     otpStore.set(email, { otp, expiresAt: Date.now() + 10 * 60 * 1000 });
@@ -62,11 +47,8 @@ export const register = async (req, res, next) => {
     email = email.toLowerCase().trim();
     password = password.trim();
 
-    // Validate duplicate email across every account table before creating a
-    // new student row (previously this only checked "students", so an email
-    // already used by a student/mentor/admin elsewhere could still register).
-    const exists = await findExistingAccountByEmail(email);
-    if (exists) return res.status(409).json({ error: ACCOUNT_EXISTS_MESSAGE });
+    const { data: existing } = await supabase.from("students").select("id").eq("email", email).single();
+    if (existing) return res.status(409).json({ error: "Email already registered" });
 
     const hashed = await bcrypt.hash(password, 10);
     const { data: user, error } = await supabase
@@ -74,14 +56,7 @@ export const register = async (req, res, next) => {
       .insert({ name, email, password: hashed })
       .select().single();
 
-    if (error) {
-      // Defensive fallback for a race condition (two simultaneous registers):
-      // Postgres unique-violation error code is 23505.
-      if (error.code === "23505") {
-        return res.status(409).json({ error: ACCOUNT_EXISTS_MESSAGE });
-      }
-      return res.status(500).json({ error: error.message });
-    }
+    if (error) return res.status(500).json({ error: error.message });
 
     const token = generateToken({ ...user, role: "student" });
     sendWelcomeEmail({ name: user.name, email: user.email, role: "student" });

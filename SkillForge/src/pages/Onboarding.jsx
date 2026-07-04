@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { GraduationCap, BookOpen, User, ChevronRight, Check, Loader2 } from "lucide-react";
-import { getTokenFor, getUserFor, saveToken, getUser } from "../auth";
+import { getTokenFor, getUserFor, saveToken } from "../auth";
 
 const BASE = "http://localhost:5000/api";
 

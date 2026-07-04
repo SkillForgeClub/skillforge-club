@@ -1,19 +1,5 @@
 import { supabase } from "../config/db.js";
 
-export const NO_MENTOR_MESSAGE = "No mentor has been assigned yet. Assignments will be available after mentor allocation.";
-
-// A student should not see/receive assignments until an admin has assigned
-// them a mentor. Checks the mentor_assignments table for a row belonging to
-// this student.
-const hasMentorAssigned = async (studentId) => {
-  const { data } = await supabase
-    .from("mentor_assignments")
-    .select("id")
-    .eq("student_id", studentId)
-    .maybeSingle();
-  return !!data;
-};
-
 const assignedToMatchesStudent = (task, userId, userEmail) => {
   const assignedTo = String(task.assigned_to || "all").trim().toLowerCase();
   const normalizedId = String(userId).trim().toLowerCase();
@@ -32,14 +18,8 @@ export const getOverview = async (req, res, next) => {
 
     const { data: user } = await supabase.from("students").select("email").eq("id", userId).single();
     const { data: myRegs } = await supabase.from("registrations").select("event_id, event_title, registered_at").ilike("email", user?.email || "");
-
-    const { data: mentorAssignment } = await supabase.from("mentor_assignments").select("mentor_id").eq("student_id", userId).maybeSingle();
-    const mentorAssigned = !!mentorAssignment;
-    let myTasks = [];
-    if (mentorAssigned) {
-      const { data: allTasks } = await supabase.from("tasks").select("*").eq("mentor_id", mentorAssignment.mentor_id);
-      myTasks = (allTasks || []).filter((task) => assignedToMatchesStudent(task, userId, user?.email));
-    }
+    const { data: allTasks } = await supabase.from("tasks").select("*");
+    const myTasks = (allTasks || []).filter((task) => assignedToMatchesStudent(task, userId, user?.email));
 
     const completed = (myTasks || []).filter((t) => t.status === "Completed").length;
     const totalTasks = (myTasks || []).length;
@@ -60,8 +40,6 @@ export const getOverview = async (req, res, next) => {
         tasksCompleted: `${completed}/${totalTasks}`,
       },
       assignments: (myTasks || []).map((t) => ({ ...t, type: t.status === "Completed" ? "done" : "pending" })),
-      mentorAssigned,
-      assignmentsMessage: mentorAssigned ? null : NO_MENTOR_MESSAGE,
       registeredEvents: (myRegs || []).map((r) => ({
         eventId: r.event_id,
         eventTitle: r.event_title,
@@ -76,32 +54,16 @@ export const getOverview = async (req, res, next) => {
 export const getAssignments = async (req, res, next) => {
   try {
     const userId = req.user.id;
-
-    // Block the assignments API entirely until a mentor has been assigned.
-    const { data: mentorAssignment } = await supabase.from("mentor_assignments").select("mentor_id").eq("student_id", userId).maybeSingle();
-    if (!mentorAssignment) {
-      return res.json({ hasMentor: false, message: NO_MENTOR_MESSAGE, assignments: [] });
-    }
-
     const { data: user } = await supabase.from("students").select("email").eq("id", userId).single();
-    const { data, error } = await supabase.from("tasks").select("*").eq("mentor_id", mentorAssignment.mentor_id);
+    const { data, error } = await supabase.from("tasks").select("*");
     if (error) return res.status(500).json({ error: error.message });
     const tasks = (data || []).filter((task) => assignedToMatchesStudent(task, userId, user?.email));
-    res.json({ hasMentor: true, message: null, assignments: tasks });
+    res.json(tasks);
   } catch (err) { next(err); }
 };
 
 export const completeAssignment = async (req, res, next) => {
   try {
-    const userId = req.user.id;
-
-    // Defensive check: students without an assigned mentor should not be able
-    // to mark assignments as complete via a direct API call either.
-    const mentorAssigned = await hasMentorAssigned(userId);
-    if (!mentorAssigned) {
-      return res.status(403).json({ error: NO_MENTOR_MESSAGE });
-    }
-
     const { data, error } = await supabase
       .from("tasks")
       .update({ status: "Completed" })
@@ -115,12 +77,8 @@ export const completeAssignment = async (req, res, next) => {
 export const getProgress = async (req, res, next) => {
   try {
     const userId = req.user.id;
-
-    const { data: mentorAssignment } = await supabase.from("mentor_assignments").select("mentor_id").eq("student_id", userId).maybeSingle();
-    if (!mentorAssignment) return res.json([]);
-
     const { data: user } = await supabase.from("students").select("email").eq("id", userId).single();
-    const { data } = await supabase.from("tasks").select("domain, status, assigned_to").eq("mentor_id", mentorAssignment.mentor_id);
+    const { data } = await supabase.from("tasks").select("domain, status, assigned_to");
     const tasks = (data || []).filter((task) => assignedToMatchesStudent(task, userId, user?.email));
 
     const domains = [...new Set(tasks.map((t) => t.domain))];

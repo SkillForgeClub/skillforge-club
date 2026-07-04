@@ -31,13 +31,7 @@ export const authApi = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password }),
     });
-    const data = await res.json();
-    // Surface duplicate-account responses consistently regardless of exact
-    // wording the backend used, so the UI always shows the expected message.
-    if (res.status === 409 && !data.error) {
-      data.error = "Account already exists. Please login.";
-    }
-    return data;
+    return res.json();
   },
 };
 

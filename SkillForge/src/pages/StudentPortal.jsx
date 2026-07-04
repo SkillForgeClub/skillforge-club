@@ -26,7 +26,6 @@ const OverviewView = () => {
         stats:            overview?.stats            ?? { totalProjects: 0, skillsLearned: 0, overallProgress: 0, tasksCompleted: 0 },
         progress:         overview?.progress         ?? [],
         assignments:      overview?.assignments      ?? [],
-        assignmentsMessage: overview?.assignmentsMessage ?? null,
         registeredEvents: overview?.registeredEvents ?? [],
         activity:         overview?.activity         ?? [],
         assignedMentor:   mentor ?? null,
@@ -80,9 +79,6 @@ const OverviewView = () => {
           {/* Assignments */}
           <div className="bg-[#1e293b]/80 border border-white/5 rounded-2xl p-6 shadow-xl">
             <h3 className="text-xl font-bold text-white mb-6">Assigned Tasks</h3>
-            {data.assignmentsMessage ? (
-              <p className="text-slate-500 text-sm">{data.assignmentsMessage}</p>
-            ) : (
             <div className="space-y-4">
               {data.assignments.map((task) => (
                 <div key={task.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-slate-800/80 transition-colors gap-4">
@@ -110,7 +106,6 @@ const OverviewView = () => {
                 </div>
               ))}
             </div>
-            )}
           </div>
         </div>
 
@@ -426,22 +421,10 @@ const ProfileView = () => {
 // -- Assignments ---------------------------------------------------------------
 const AssignmentsView = () => {
   const [data, setData]       = useState([]);
-  const [noMentorMessage, setNoMentorMessage] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    authFetch("/student/assignments").then((d) => {
-      // Backend now returns { hasMentor, message, assignments } instead of a
-      // bare array so the UI can tell "no mentor yet" apart from "no tasks".
-      if (d && Array.isArray(d.assignments)) {
-        setData(d.assignments);
-        setNoMentorMessage(d.hasMentor ? null : d.message);
-      } else {
-        setData(Array.isArray(d) ? d : []);
-        setNoMentorMessage(null);
-      }
-      setLoading(false);
-    });
+    authFetch("/student/assignments").then((d) => { setData(Array.isArray(d) ? d : []); setLoading(false); });
   }, []);
 
   const markDone = async (id) => {
@@ -454,32 +437,23 @@ const AssignmentsView = () => {
 
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-cyan-400 w-8 h-8" /></div>;
 
-  if (noMentorMessage) {
-    return (
-      <div className="space-y-6">
-        <h2 className="text-3xl font-black text-white border-b border-white/10 pb-4">Assigned Tasks</h2>
-        <p className="text-slate-500 text-sm">{noMentorMessage}</p>
-      </div>
-    );
-  }
-
   const pending   = data.filter((a) => a.status !== "Completed");
   const completed = data.filter((a) => a.status === "Completed");
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-black text-white border-b border-white/10 pb-4">Assigned Tasks</h2>
+      <h2 className="text-3xl font-black text-white border-b border-white/10 pb-4">Assignments</h2>
 
       <div className="space-y-3">
         <h3 className="text-lg font-bold text-amber-400">Pending ({pending.length})</h3>
-        {pending.length === 0 && <p className="text-slate-500">All caught up! 🎉</p>}
+        {pending.length === 0 && <p className="text-slate-500">All caught up! ??</p>}
         {pending.map((task) => (
           <div key={task.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-slate-800/80 transition-colors">
             <div className="flex items-center gap-4">
               <Clock className="w-6 h-6 text-amber-400 flex-shrink-0" />
               <div>
                 <h4 className="font-semibold text-white">{task.title}</h4>
-                <p className="text-sm text-slate-400">Deadline: <span className={task.type === "urgent" ? "text-rose-400 font-bold" : ""}>{task.deadline}</span> · {task.domain}</p>
+                <p className="text-sm text-slate-400">Deadline: <span className={task.type === "urgent" ? "text-rose-400 font-bold" : ""}>{task.deadline}</span> � {task.domain}</p>
               </div>
             </div>
             <button onClick={() => markDone(task.id)} className="px-4 py-2 text-xs font-bold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-slate-900 transition-all">

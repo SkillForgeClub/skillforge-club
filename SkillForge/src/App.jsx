@@ -19,6 +19,7 @@ import Onboarding from './pages/Onboarding';
 import StudentPortal from './pages/StudentPortal';
 import AdminPortal from './pages/AdminPortal';
 import MentorPortal from './pages/MentorPortal';
+import CursorGlow from './components/CursorGlow';
 
 // Icons for Dashboard Menus
 import { LayoutDashboard, BookOpen, Rocket, BookOpenCheck, BrainCircuit, MessageSquare, User, Users, ClipboardCheck, Code2, CalendarCheck, Settings, UserSquare } from 'lucide-react';
@@ -52,6 +53,7 @@ const adminMenu = [
 function App() {
   return (
     <Router>
+      <CursorGlow />
       <Routes>
         {/* Main Website Routes */}
         <Route element={<MainLayout />}>
