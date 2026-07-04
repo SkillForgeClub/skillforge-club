@@ -33,10 +33,11 @@ export const getOverview = async (req, res, next) => {
     const { data: user } = await supabase.from("students").select("email").eq("id", userId).single();
     const { data: myRegs } = await supabase.from("registrations").select("event_id, event_title, registered_at").ilike("email", user?.email || "");
 
-    const mentorAssigned = await hasMentorAssigned(userId);
+    const { data: mentorAssignment } = await supabase.from("mentor_assignments").select("mentor_id").eq("student_id", userId).maybeSingle();
+    const mentorAssigned = !!mentorAssignment;
     let myTasks = [];
     if (mentorAssigned) {
-      const { data: allTasks } = await supabase.from("tasks").select("*");
+      const { data: allTasks } = await supabase.from("tasks").select("*").eq("mentor_id", mentorAssignment.mentor_id);
       myTasks = (allTasks || []).filter((task) => assignedToMatchesStudent(task, userId, user?.email));
     }
 
@@ -77,13 +78,13 @@ export const getAssignments = async (req, res, next) => {
     const userId = req.user.id;
 
     // Block the assignments API entirely until a mentor has been assigned.
-    const mentorAssigned = await hasMentorAssigned(userId);
-    if (!mentorAssigned) {
+    const { data: mentorAssignment } = await supabase.from("mentor_assignments").select("mentor_id").eq("student_id", userId).maybeSingle();
+    if (!mentorAssignment) {
       return res.json({ hasMentor: false, message: NO_MENTOR_MESSAGE, assignments: [] });
     }
 
     const { data: user } = await supabase.from("students").select("email").eq("id", userId).single();
-    const { data, error } = await supabase.from("tasks").select("*");
+    const { data, error } = await supabase.from("tasks").select("*").eq("mentor_id", mentorAssignment.mentor_id);
     if (error) return res.status(500).json({ error: error.message });
     const tasks = (data || []).filter((task) => assignedToMatchesStudent(task, userId, user?.email));
     res.json({ hasMentor: true, message: null, assignments: tasks });
@@ -115,11 +116,11 @@ export const getProgress = async (req, res, next) => {
   try {
     const userId = req.user.id;
 
-    const mentorAssigned = await hasMentorAssigned(userId);
-    if (!mentorAssigned) return res.json([]);
+    const { data: mentorAssignment } = await supabase.from("mentor_assignments").select("mentor_id").eq("student_id", userId).maybeSingle();
+    if (!mentorAssignment) return res.json([]);
 
     const { data: user } = await supabase.from("students").select("email").eq("id", userId).single();
-    const { data } = await supabase.from("tasks").select("domain, status, assigned_to");
+    const { data } = await supabase.from("tasks").select("domain, status, assigned_to").eq("mentor_id", mentorAssignment.mentor_id);
     const tasks = (data || []).filter((task) => assignedToMatchesStudent(task, userId, user?.email));
 
     const domains = [...new Set(tasks.map((t) => t.domain))];
