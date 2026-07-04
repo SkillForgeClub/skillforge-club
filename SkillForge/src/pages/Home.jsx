@@ -1,11 +1,12 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Settings, BrainCircuit, Rocket, BookOpen, Calendar, Users, MessageSquare, LogIn, ChevronRight, CheckCircle2, ChevronDown, MonitorPlay, Code2, Sparkles, Mail, Phone, MapPin, Send, Code, Cpu, Smartphone } from 'lucide-react';
 import skillForgeLogo from '../assets/logo.png';
 import campusBg from '../assets/campus.png';
 
 const Home = React.memo(() => {
+  const navigate = useNavigate();
   const { scrollY } = useScroll();
 
   // Simplified parallax - reduced animation intensity
@@ -650,7 +651,7 @@ const Home = React.memo(() => {
                       whileHover={{ y: -6, scale: 1.02, borderColor: "rgba(59, 130, 246, 0.5)", backgroundColor: "rgba(30, 41, 59, 0.8)", boxShadow: "0 10px 25px rgba(59, 130, 246, 0.2)" }}
                       transition={{ type: "spring", stiffness: 300, damping: 20 }}
                       className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 transition-colors duration-300 cursor-pointer"
-                      onClick={() => window.location.href = '/events'}
+                      onClick={() => navigate('/events')}
                     >
                       <div className="flex items-start justify-between">
                         <div>
@@ -674,7 +675,7 @@ const Home = React.memo(() => {
                       whileHover={{ y: -6, scale: 1.02, borderColor: "rgba(59, 130, 246, 0.5)", backgroundColor: "rgba(30, 41, 59, 0.8)", boxShadow: "0 10px 25px rgba(59, 130, 246, 0.2)" }}
                       transition={{ type: "spring", stiffness: 300, damping: 20 }}
                       className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 transition-colors duration-300 cursor-pointer"
-                      onClick={() => window.location.href = '/events'}
+                      onClick={() => navigate('/events')}
                     >
                       <div className="flex items-start justify-between">
                         <div>
@@ -722,7 +723,7 @@ const Home = React.memo(() => {
                     whileHover={{ y: -6, scale: 1.02, borderColor: "rgba(168, 85, 247, 0.5)", backgroundColor: "rgba(30, 41, 59, 0.8)", boxShadow: "0 10px 25px rgba(168, 85, 247, 0.2)" }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                     className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 flex items-center justify-between group transition-colors duration-300 cursor-pointer"
-                    onClick={() => window.location.href = '/team'}
+                    onClick={() => navigate('/team')}
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center font-bold text-xl text-white group-hover:bg-purple-500 transition-colors duration-200">

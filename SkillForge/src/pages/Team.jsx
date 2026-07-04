@@ -37,8 +37,8 @@ import imgTharunKumar from '../assets/profile photos (File responses)/tharun.jpe
 const shuffleAndAssignOrder = (list) => {
   if (!Array.isArray(list) || list.length === 0) return [];
   const clonedList = list.map(m => ({ ...m }));
-  const lead = clonedList.find(m => m.name.toLowerCase().includes('chaitanya'));
-  const coLead = clonedList.find(m => m.name.toLowerCase().includes('jaishnavi'));
+  const lead = clonedList.find(m => m.name?.toLowerCase().includes('chaitanya'));
+  const coLead = clonedList.find(m => m.name?.toLowerCase().includes('jaishnavi'));
   const others = clonedList.filter(m => m !== lead && m !== coLead);
   for (let i = others.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -390,11 +390,11 @@ const Team = () => {
         if (Array.isArray(data) && data.length > 0) {
           // If the backend has team members, merge them or prioritize our rich local members list
           const merged = data.map(backendMember => {
-            const backendName = backendMember.name.toLowerCase();
+            const backendName = (backendMember.name || '').toLowerCase();
             const matchedMock = MOCK_TEAM.find(m => {
-              const mockName = m.name.toLowerCase();
+              const mockName = (m.name || '').toLowerCase();
               if (mockName === backendName) return true;
-              if (mockName.includes(backendName) || backendName.includes(mockName)) return true;
+              if (backendName && (mockName.includes(backendName) || backendName.includes(mockName))) return true;
               const mockWords = mockName.split(/\s+/).filter(w => w.length > 2);
               const backendWords = backendName.split(/\s+/).filter(w => w.length > 2);
               return mockWords.some(w => backendWords.includes(w));
@@ -419,9 +419,9 @@ const Team = () => {
           });
           
           // Ensure all local mock members are present
-          const mergedNames = new Set(merged.map(m => m.name.toLowerCase()));
+          const mergedNames = new Set(merged.map(m => (m.name || '').toLowerCase()).filter(Boolean));
           MOCK_TEAM.forEach(mockMem => {
-            if (!mergedNames.has(mockMem.name.toLowerCase())) {
+            if (mockMem.name && !mergedNames.has(mockMem.name.toLowerCase())) {
               merged.push(mockMem);
             }
           });
@@ -458,8 +458,8 @@ const Team = () => {
   const filteredTeam = useMemo(() => {
     return team.filter((member) => {
       const isLead = (() => {
-        const name = member.name.toLowerCase();
-        const role = member.role.toLowerCase();
+        const name = (member.name || '').toLowerCase();
+        const role = (member.role || '').toLowerCase();
         if (name.includes('vaishnavi') && name.includes('p')) return false;
         if (name.includes('vainavi')) return false;
         if (name.includes('navya sri')) return false;
@@ -478,8 +478,8 @@ const Team = () => {
         (selectedCategory === 'Leads' && isLead) ||
         (selectedCategory !== 'Leads' && member.department && member.department.includes(selectedCategory));
       const matchesSearch = 
-        member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        member.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (member.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (member.role || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (member.department && member.department.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesCategory && matchesSearch;
     });
@@ -489,7 +489,7 @@ const Team = () => {
   const sortedTeam = useMemo(() => {
     if (selectedCategory === 'All') {
       const getCustomOrder = (name) => {
-        const n = name.toLowerCase();
+        const n = (name || '').toLowerCase();
         if (n.includes('chaitanya')) return 1;
         if (n.includes('jaishnavi')) return 2;
         return 99; // Default for others
@@ -507,7 +507,7 @@ const Team = () => {
 
     if (selectedCategory === 'Technical Team') {
       const getCustomOrder = (name) => {
-        const n = name.toLowerCase();
+        const n = (name || '').toLowerCase();
         if (n.includes('navya') && (n.includes('aripaka') || n.includes('a.'))) return 1;
         if (n.includes('karthik') && n.includes('kunduru')) return 2;
         if (n.includes('padmavathi')) return 3;
@@ -526,7 +526,7 @@ const Team = () => {
 
     return [...filteredTeam].sort((a, b) => {
       const getPriority = (role) => {
-        const r = role.toLowerCase();
+        const r = (role || '').toLowerCase();
         if (r.includes('president')) return 1;
         if (r.includes('lead') || r.includes('director')) return 2;
         if (r.includes('engineer') || r.includes('developer') || r.includes('designer')) return 3;
