@@ -20,9 +20,10 @@ const TeamCard = React.memo(({ name, role, domain, imageUrl, linkedin, github, o
 
   return (
     <motion.div
-      whileHover={{ y: -6, scale: 1.01 }}
+      whileHover={{ y: -10, scale: 1.03 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
       onClick={onClick}
-      className="group glass-card rounded-2xl overflow-hidden border border-white/5 hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] transition-all duration-300 cursor-pointer flex flex-col h-full"
+      className="group glass-card rounded-2xl overflow-hidden border border-white/5 hover:border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.2)] transition-colors duration-300 cursor-pointer flex flex-col h-full relative"
     >
       {/* Avatar */}
       <div className="h-80 relative overflow-hidden flex-shrink-0">

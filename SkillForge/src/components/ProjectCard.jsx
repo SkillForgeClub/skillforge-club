@@ -19,9 +19,12 @@ const ProjectCard = React.memo(({ title, description, category, image, githubLin
 
   return (
     <motion.div
-      whileHover={{ y: -6 }}
-      className="glass-card rounded-[2rem] overflow-hidden group hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] transition-all duration-300 flex flex-col h-full shadow-xl shadow-black/25"
+      whileHover={{ y: -10, scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className="bg-slate-950/60 backdrop-blur-2xl border border-white/10 rounded-[2rem] overflow-hidden group hover:border-cyan-500/40 hover:shadow-[0_0_40px_rgba(6,182,212,0.25)] transition-colors duration-300 flex flex-col h-full shadow-2xl shadow-black/40 relative"
     >
+      {/* Top Border Glow Line */}
+      <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20" />
       {/* Image / Placeholder */}
       <div className="h-48 bg-gradient-to-br from-slate-900 to-slate-950 border-b border-white/5 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-500 via-transparent to-transparent z-10" />

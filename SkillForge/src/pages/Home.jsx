@@ -318,8 +318,9 @@ const Home = React.memo(() => {
                 <motion.div
                   key={idx}
                   variants={fadeInUpVariants}
-                  whileHover={{ y: -8, borderColor: "rgba(6, 182, 212, 0.5)", backgroundColor: "rgba(15, 23, 42, 0.7)", boxShadow: "0 0 30px rgba(6, 182, 212, 0.15)" }}
-                  className="bg-slate-950/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 transition-all duration-300 text-left group box-border cursor-default shadow-xl shadow-black/25"
+                  whileHover={{ y: -10, scale: 1.03, borderColor: "rgba(6, 182, 212, 0.5)", backgroundColor: "rgba(15, 23, 42, 0.7)", boxShadow: "0 15px 40px rgba(6, 182, 212, 0.2)" }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="bg-slate-950/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 transition-colors duration-300 text-left group box-border cursor-default shadow-xl shadow-black/25"
                 >
                   <div className="mb-6 w-12 h-12 flex items-center justify-center bg-cyan-500/10 rounded-2xl border border-cyan-500/20 group-hover:scale-110 transition-transform duration-300">
                     <img src={skillForgeLogo} alt="SkillForge Club Logo" className="w-8 h-8 object-contain opacity-90" />
@@ -333,8 +334,9 @@ const Home = React.memo(() => {
             {/* Q&A Card */}
             <motion.div
               variants={fadeInUpVariants}
-              whileHover={{ borderColor: "rgba(6, 182, 212, 0.4)", boxShadow: "0 0 40px rgba(6, 182, 212, 0.15)" }}
-              className="bg-gradient-to-br from-cyan-950/20 via-slate-950/50 to-blue-950/20 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 text-left relative overflow-hidden group transition-all duration-300 box-border shadow-2xl shadow-black/30"
+              whileHover={{ scale: 1.01, borderColor: "rgba(6, 182, 212, 0.4)", boxShadow: "0 10px 40px rgba(6, 182, 212, 0.2)" }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="bg-gradient-to-br from-cyan-950/20 via-slate-950/50 to-blue-950/20 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 text-left relative overflow-hidden group transition-colors duration-300 box-border shadow-2xl shadow-black/30"
             >
               <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-[60px] -mr-32 -mt-32" style={{ willChange: 'none' }} />
               <h3 className="text-3xl md:text-4xl font-bold text-white mb-6 relative z-10">What is SkillForge?</h3>
@@ -569,17 +571,18 @@ const Home = React.memo(() => {
                   <motion.div
                     key={idx}
                     variants={fadeInUpVariants}
-                    whileHover={{ y: -8 }}
-                    className="flex gap-4 md:flex-col items-start md:items-center text-left md:text-center group"
+                    whileHover={{ y: -10, scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className="flex gap-4 md:flex-col items-start md:items-center text-left md:text-center group cursor-default"
                   >
                     {/* Node connector dot / icon container */}
-                    <div className="w-14 h-14 rounded-2xl bg-slate-950 border border-white/10 flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 group-hover:border-cyan-500/40 transition-all duration-300 relative z-20">
+                    <div className="w-14 h-14 rounded-2xl bg-slate-950 border border-white/10 flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 group-hover:border-cyan-500/40 transition-colors duration-300 relative z-20">
                       {domain.icon}
                     </div>
 
                     {/* Node details card */}
                     <div 
-                      className="glass-card rounded-[2rem] p-6 shadow-xl shadow-black/25 flex flex-col justify-between flex-grow h-full border-t border-t-white/15"
+                      className="bg-slate-950/45 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 group-hover:border-cyan-500/30 group-hover:shadow-[0_10px_30px_rgba(6,182,212,0.15)] transition-all duration-300 flex flex-col justify-between flex-grow h-full border-t border-t-white/15"
                     >
                       <div>
                         <h3 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors duration-200">{domain.title}</h3>
@@ -644,8 +647,9 @@ const Home = React.memo(() => {
                     <motion.div
                       key={i}
                       variants={fadeInUpVariants}
-                      whileHover={{ y: -4 }}
-                      className="p-6 rounded-3xl glass-card cursor-pointer"
+                      whileHover={{ y: -6, scale: 1.02, borderColor: "rgba(59, 130, 246, 0.5)", backgroundColor: "rgba(30, 41, 59, 0.8)", boxShadow: "0 10px 25px rgba(59, 130, 246, 0.2)" }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 transition-colors duration-300 cursor-pointer"
                       onClick={() => window.location.href = '/events'}
                     >
                       <div className="flex items-start justify-between">
@@ -667,8 +671,9 @@ const Home = React.memo(() => {
                     <motion.div
                       key={i}
                       variants={fadeInUpVariants}
-                      whileHover={{ y: -4 }}
-                      className="p-6 rounded-3xl glass-card cursor-pointer"
+                      whileHover={{ y: -6, scale: 1.02, borderColor: "rgba(59, 130, 246, 0.5)", backgroundColor: "rgba(30, 41, 59, 0.8)", boxShadow: "0 10px 25px rgba(59, 130, 246, 0.2)" }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 transition-colors duration-300 cursor-pointer"
                       onClick={() => window.location.href = '/events'}
                     >
                       <div className="flex items-start justify-between">
@@ -714,8 +719,9 @@ const Home = React.memo(() => {
                   <motion.div
                     key={i}
                     variants={fadeInUpVariants}
-                    whileHover={{ y: -4 }}
-                    className="p-6 rounded-3xl glass-card flex items-center justify-between group cursor-pointer"
+                    whileHover={{ y: -6, scale: 1.02, borderColor: "rgba(168, 85, 247, 0.5)", backgroundColor: "rgba(30, 41, 59, 0.8)", boxShadow: "0 10px 25px rgba(168, 85, 247, 0.2)" }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 flex items-center justify-between group transition-colors duration-300 cursor-pointer"
                     onClick={() => window.location.href = '/team'}
                   >
                     <div className="flex items-center gap-4">
@@ -762,21 +768,37 @@ const Home = React.memo(() => {
               className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 max-w-3xl mx-auto"
             >
               {[
-                { title: 'Email Us', info: 'skillforgeclub123@gmail.com', icon: <Mail className="w-8 h-8 text-cyan-400" /> },
-                { title: 'Visit Us', info: "Vignan's Institute of Information Technology, Visakhapatnam", icon: <MapPin className="w-8 h-8 text-blue-400" /> }
+                { 
+                  title: 'Email Us', 
+                  info: 'skillforge123@gmail.com', 
+                  icon: <Mail className="w-8 h-8 text-cyan-400" />,
+                  href: 'https://mail.google.com/mail/?view=cm&fs=1&to=skillforge123@gmail.com',
+                  target: '_blank'
+                },
+                { 
+                  title: 'Visit Us', 
+                  info: "Vignan's Institute of Information Technology, Visakhapatnam", 
+                  icon: <MapPin className="w-8 h-8 text-blue-400" />,
+                  href: 'https://maps.app.goo.gl/E2XekPJjFzf5946c8',
+                  target: '_blank'
+                }
               ].map((contact, idx) => (
-                <motion.div
+                <motion.a
                   key={idx}
+                  href={contact.href}
+                  target={contact.target}
+                  rel={contact.target === '_blank' ? 'noopener noreferrer' : undefined}
                   variants={fadeInUpVariants}
-                  whileHover={{ y: -8, borderColor: "rgba(6, 182, 212, 0.5)", backgroundColor: "rgba(15, 23, 42, 0.7)", boxShadow: "0 0 30px rgba(6, 182, 212, 0.15)" }}
-                  className="bg-slate-950/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col items-center text-center transition-all duration-300 group cursor-default shadow-xl shadow-black/20"
+                  whileHover={{ y: -10, scale: 1.03, borderColor: "rgba(6, 182, 212, 0.5)", backgroundColor: "rgba(15, 23, 42, 0.7)", boxShadow: "0 15px 40px rgba(6, 182, 212, 0.2)" }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="bg-slate-950/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col items-center text-center transition-colors duration-300 group cursor-pointer shadow-xl shadow-black/20"
                 >
                   <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-6 group-hover:scale-105 transition-transform duration-200 border border-white/5">
                     {contact.icon}
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">{contact.title}</h3>
-                  <p className="text-cyan-100/70 font-medium">{contact.info}</p>
-                </motion.div>
+                  <p className="text-cyan-100/70 font-medium group-hover:text-cyan-300 transition-colors">{contact.info}</p>
+                </motion.a>
               ))}
             </motion.div>
             

@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import ScrollToTop from './components/ScrollToTop';
+import CursorGlow from './components/CursorGlow';
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
@@ -19,8 +21,6 @@ import Onboarding from './pages/Onboarding';
 import StudentPortal from './pages/StudentPortal';
 import AdminPortal from './pages/AdminPortal';
 import MentorPortal from './pages/MentorPortal';
-import CursorGlow from './components/CursorGlow';
-
 // Icons for Dashboard Menus
 import { LayoutDashboard, BookOpen, Rocket, BookOpenCheck, BrainCircuit, MessageSquare, User, Users, ClipboardCheck, Code2, CalendarCheck, Settings, UserSquare } from 'lucide-react';
 
@@ -53,9 +53,9 @@ const adminMenu = [
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <CursorGlow />
       <Routes>
-        {/* Main Website Routes */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -65,9 +65,10 @@ function App() {
           <Route path="/team" element={<Team />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/feedback" element={<Feedback />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/onboarding" element={<Onboarding />} />
         </Route>
+
+        <Route path="/login" element={<Login />} />
+        <Route path="/onboarding" element={<Onboarding />} />
 
         {/* Student Portal Routes */}
         <Route element={<DashboardLayout menuItems={studentMenu} role="Student" />}>

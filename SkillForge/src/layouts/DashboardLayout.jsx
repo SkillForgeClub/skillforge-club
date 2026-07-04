@@ -1,7 +1,9 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, LogOut, BrainCircuit } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { getUserFor, logoutRole, getTokenFor } from "../auth";
+import PageTransition from "../components/PageTransition";
 
 const DashboardLayout = React.memo(({ menuItems = [], role = "User" }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -121,7 +123,11 @@ const DashboardLayout = React.memo(({ menuItems = [], role = "User" }) => {
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 relative z-10">
-          <Outlet />
+          <AnimatePresence mode="wait" initial={false}>
+            <PageTransition key={location.pathname}>
+              <Outlet />
+            </PageTransition>
+          </AnimatePresence>
         </main>
       </div>
     </div>

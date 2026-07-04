@@ -946,7 +946,7 @@ const StudentPortal = () => {
 
   const renderContent = () => {
     if (path.endsWith("/profile"))     return <ProfileView />;
-    if (path.endsWith("/progress"))    return <ProgressView />;
+    if (path.endsWith("/progress"))    return <FallbackView title="Progress Tracking" />;
     if (path.endsWith("/assignments")) return <AssignmentsView />;
     if (path.endsWith("/domains"))     return <DomainsView />;
     if (path.endsWith("/mentor"))      return <MentorView />;

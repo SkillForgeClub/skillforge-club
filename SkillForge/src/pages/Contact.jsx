@@ -77,15 +77,20 @@ const Contact = () => {
               </div>
             </div>
             
-            <div className="bg-slate-950/40 backdrop-blur-xl border border-white/10 p-8 rounded-2xl flex items-start gap-4 shadow-xl">
-              <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center shrink-0 border border-purple-500/30">
+            <a 
+              href="https://mail.google.com/mail/?view=cm&fs=1&to=skillforge123@gmail.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-slate-950/40 backdrop-blur-xl border border-white/10 p-8 rounded-2xl flex items-start gap-4 shadow-xl hover:border-cyan-500/30 transition-all duration-300 group block"
+            >
+              <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center shrink-0 border border-purple-500/30 group-hover:scale-105 transition-transform duration-300">
                 <Mail className="text-purple-400" />
               </div>
               <div>
                 <h3 className="text-xl font-bold text-white mb-2">Email</h3>
-                <p className="text-gray-400">skillforgeclub123@gmail.com</p>
+                <p className="text-gray-400 group-hover:text-cyan-400 transition-colors">skillforge123@gmail.com</p>
               </div>
-            </div>
+            </a>
 
             {/* Social Accounts Card */}
             <div className="bg-slate-950/40 backdrop-blur-xl border border-white/10 p-8 rounded-2xl flex items-start gap-4 shadow-xl">

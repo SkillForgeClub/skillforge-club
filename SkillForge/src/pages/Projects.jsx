@@ -131,20 +131,28 @@ const Projects = () => {
         )}
 
         {/* Dynamic category filters from DB */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setFilter(cat)}
-              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
-                filter === cat
-                  ? 'bg-cyan-500 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.4)] border border-cyan-400'
-                  : 'bg-slate-900/60 backdrop-blur-md text-gray-400 hover:text-white hover:bg-slate-800/80 border border-white/5'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+        <div className="flex flex-wrap justify-center gap-3 mb-12 relative z-10">
+          {categories.map((cat) => {
+            const isSelected = filter === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => setFilter(cat)}
+                className={`px-6 py-2.5 rounded-full text-sm font-bold transition-colors duration-300 relative ${
+                  isSelected ? 'text-slate-950' : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                {isSelected && (
+                  <motion.span
+                    layoutId="activeFilterPill"
+                    className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full shadow-[0_0_20px_rgba(6,182,212,0.35)]"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10">{cat}</span>
+              </button>
+            );
+          })}
         </div>
 
         {filtered.length === 0 ? (
