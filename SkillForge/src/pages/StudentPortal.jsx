@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Mail, Phone, Rocket, BookOpen, Trophy, Target, Clock, CheckCircle2, MessageSquare, BrainCircuit, Code2, Loader2, User, CalendarCheck, ExternalLink, ChevronRight, Star, Layers, Globe, Database, Brain, Cpu, Shield, Smartphone, BarChart2, Send } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mail, Phone, Rocket, BookOpen, Trophy, Target, Clock, CheckCircle2, MessageSquare, BrainCircuit, Code2, Loader2, User, CalendarCheck, ExternalLink, ChevronRight, Star, Layers, Globe, Database, Brain, Cpu, Shield, Smartphone, BarChart2, Send, Lock } from "lucide-react";
 import { getTokenFor, getUser, logout } from "../auth";
+
+// Shared animation variants
+const fadeUp = { initial: { opacity: 0, y: 22 }, animate: { opacity: 1, y: 0, transition: { duration: 0.38, ease: [0.16, 1, 0.3, 1] } }, exit: { opacity: 0, y: -14, transition: { duration: 0.2, ease: 'easeIn' } } };
+const sectionAnim = { initial: { opacity: 0, x: 18 }, animate: { opacity: 1, x: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }, exit: { opacity: 0, x: -18, transition: { duration: 0.18, ease: 'easeIn' } } };
 
 const BASE = "http://localhost:5000/api";
 const authFetch = async (path) => {
@@ -76,36 +81,56 @@ const OverviewView = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {/* Assignments */}
+          {/* Assignments — only visible if mentor is assigned */}
           <div className="bg-[#1e293b]/80 border border-white/5 rounded-2xl p-6 shadow-xl">
             <h3 className="text-xl font-bold text-white mb-6">Assigned Tasks</h3>
-            <div className="space-y-4">
-              {data.assignments.map((task) => (
-                <div key={task.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-slate-800/80 transition-colors gap-4">
-                  <div className="flex items-center gap-4">
-                    {task.type === "done" ? (
-                      <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
-                    ) : (
-                      <Clock className="w-6 h-6 text-blue-400 flex-shrink-0" />
-                    )}
-                    <div>
-                      <h4 className="font-semibold text-white">{task.title}</h4>
-                      <p className="text-sm text-slate-400">Deadline: <span className={task.type === "urgent" ? "text-rose-400 font-bold" : ""}>{task.deadline}</span></p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-3 py-1 text-xs font-bold rounded-full ${task.status === "Completed" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
-                      {task.status}
-                    </span>
-                    {task.status !== "Completed" && (
-                      <button onClick={() => markDone(task.id)} className="px-3 py-1 text-xs font-bold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-slate-900 transition-all">
-                        Mark Done
-                      </button>
-                    )}
-                  </div>
+            {!data.assignedMentor ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
+                className="flex flex-col items-center justify-center py-10 gap-4 text-center"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-slate-800/80 border border-white/10 flex items-center justify-center">
+                  <Lock className="w-8 h-8 text-slate-500" />
                 </div>
-              ))}
-            </div>
+                <div>
+                  <p className="text-white font-bold text-base">Assignments</p>
+                  <p className="text-slate-400 text-sm mt-1 max-w-xs">No mentor has been assigned yet. Assignments will be available after mentor allocation.</p>
+                </div>
+              </motion.div>
+            ) : (
+              <div className="space-y-4">
+                {data.assignments.length === 0 ? (
+                  <p className="text-slate-500 text-sm text-center py-6">No tasks assigned yet. Your mentor will add tasks soon.</p>
+                ) : data.assignments.map((task) => (
+                  <motion.div key={task.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
+                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-slate-800/80 transition-colors gap-4">
+                    <div className="flex items-center gap-4">
+                      {task.type === "done" ? (
+                        <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
+                      ) : (
+                        <Clock className="w-6 h-6 text-blue-400 flex-shrink-0" />
+                      )}
+                      <div>
+                        <h4 className="font-semibold text-white">{task.title}</h4>
+                        <p className="text-sm text-slate-400">Deadline: <span className={task.type === "urgent" ? "text-rose-400 font-bold" : ""}>{task.deadline}</span></p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-3 py-1 text-xs font-bold rounded-full ${task.status === "Completed" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
+                        {task.status}
+                      </span>
+                      {task.status !== "Completed" && (
+                        <button onClick={() => markDone(task.id)} className="px-3 py-1 text-xs font-bold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-slate-900 transition-all">
+                          Mark Done
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -285,11 +310,9 @@ const ProfileView = () => {
                 <p className="text-slate-400 font-medium text-sm">{profile.email}</p>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+              <div className="grid grid-cols-2 gap-4 pt-2 max-w-md">
                 {[
                   { label: "My Domains", value: domainList.length, color: "text-cyan-400" },
-                  { label: "Registered Events", value: profile.totalProjects, color: "text-purple-400" },
-                  { label: "Year Level", value: "Sophomore", color: "text-white" },
                   { label: "Joined Year", value: new Date(profile.created_at || profile.createdAt).getFullYear(), color: "text-yellow-400" },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="bg-slate-900/50 border border-white/5 rounded-2xl p-4 flex flex-col justify-center items-center min-h-[85px] overflow-hidden">
@@ -420,11 +443,19 @@ const ProfileView = () => {
 
 // -- Assignments ---------------------------------------------------------------
 const AssignmentsView = () => {
-  const [data, setData]       = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [data, setData]         = useState([]);
+  const [mentor, setMentor]     = useState(null);
+  const [loading, setLoading]   = useState(true);
 
   useEffect(() => {
-    authFetch("/student/assignments").then((d) => { setData(Array.isArray(d) ? d : []); setLoading(false); });
+    Promise.all([
+      authFetch("/student/assignments"),
+      authFetch("/assignments/my-mentor"),
+    ]).then(([assignments, mentorData]) => {
+      setData(Array.isArray(assignments) ? assignments : []);
+      setMentor(mentorData && mentorData.id ? mentorData : null);
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, []);
 
   const markDone = async (id) => {
@@ -437,47 +468,94 @@ const AssignmentsView = () => {
 
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-cyan-400 w-8 h-8" /></div>;
 
+  // No mentor → show locked state
+  if (!mentor) return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      className="space-y-6"
+    >
+      <h2 className="text-3xl font-black text-white border-b border-white/10 pb-4">Assignments</h2>
+      <div className="flex flex-col items-center justify-center py-20 gap-6 text-center">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.1, duration: 0.5, type: "spring", stiffness: 200 }}
+          className="w-24 h-24 rounded-3xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 flex items-center justify-center shadow-2xl"
+        >
+          <Lock className="w-12 h-12 text-slate-400" />
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.4 }}>
+          <p className="text-white font-black text-2xl mb-3">Assignments</p>
+          <p className="text-slate-400 text-base max-w-sm leading-relaxed">
+            No mentor has been assigned yet.<br />
+            <span className="text-slate-500 text-sm">Assignments will be available after mentor allocation.</span>
+          </p>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+
   const pending   = data.filter((a) => a.status !== "Completed");
   const completed = data.filter((a) => a.status === "Completed");
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className="space-y-6"
+    >
       <h2 className="text-3xl font-black text-white border-b border-white/10 pb-4">Assignments</h2>
 
       <div className="space-y-3">
         <h3 className="text-lg font-bold text-amber-400">Pending ({pending.length})</h3>
-        {pending.length === 0 && <p className="text-slate-500">All caught up! ??</p>}
-        {pending.map((task) => (
-          <div key={task.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-slate-800/80 transition-colors">
+        {pending.length === 0 && <p className="text-slate-500">All caught up! 🎉</p>}
+        {pending.map((task, i) => (
+          <motion.div
+            key={task.id}
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: i * 0.05 }}
+            className="flex items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-slate-800/80 hover:border-amber-500/20 transition-all"
+          >
             <div className="flex items-center gap-4">
               <Clock className="w-6 h-6 text-amber-400 flex-shrink-0" />
               <div>
                 <h4 className="font-semibold text-white">{task.title}</h4>
-                <p className="text-sm text-slate-400">Deadline: <span className={task.type === "urgent" ? "text-rose-400 font-bold" : ""}>{task.deadline}</span> � {task.domain}</p>
+                <p className="text-sm text-slate-400">Deadline: <span className={task.type === "urgent" ? "text-rose-400 font-bold" : ""}>{task.deadline}</span> · {task.domain}</p>
               </div>
             </div>
             <button onClick={() => markDone(task.id)} className="px-4 py-2 text-xs font-bold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-slate-900 transition-all">
               Mark Done
             </button>
-          </div>
+          </motion.div>
         ))}
       </div>
 
       <div className="space-y-3">
         <h3 className="text-lg font-bold text-emerald-400">Completed ({completed.length})</h3>
-        {completed.map((task) => (
-          <div key={task.id} className="flex items-center gap-4 p-4 rounded-xl bg-slate-900/30 border border-white/5 opacity-70">
+        {completed.map((task, i) => (
+          <motion.div
+            key={task.id}
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: i * 0.05 }}
+            className="flex items-center gap-4 p-4 rounded-xl bg-slate-900/30 border border-white/5 opacity-70"
+          >
             <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
             <div>
               <h4 className="font-semibold text-white line-through">{task.title}</h4>
               <p className="text-sm text-slate-500">{task.domain}</p>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
+
 
 // -- Mentor View ---------------------------------------------------------------
 const MentorView = () => {
@@ -792,19 +870,41 @@ const DomainsView = () => {
             const dm = DOMAIN_DATA[d] ?? DEFAULT_DOMAIN;
             const cm = colorMap[dm.color] ?? colorMap.cyan;
             return (
-              <button key={d} onClick={() => setActiveTab(idx)}
-                className={`px-4 py-2 rounded-full text-sm font-bold border transition-all ${
+              <motion.button
+                key={d}
+                onClick={() => setActiveTab(idx)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+                className={`px-4 py-2 rounded-full text-sm font-bold border transition-all duration-200 relative ${
                   activeTab === idx ? cm.tab : "bg-slate-800 text-slate-400 border-white/10 hover:text-white"
-                }`}>
-                {d}
-              </button>
+                }`}
+              >
+                {activeTab === idx && (
+                  <motion.span
+                    layoutId="domainTabIndicator"
+                    className="absolute inset-0 rounded-full bg-white/5"
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10">{d}</span>
+              </motion.button>
             );
           })}
         </div>
       )}
 
+      {/* Animated domain content */}
+      <AnimatePresence mode="wait">
+
       {/* Header banner */}
-      <div className={`bg-gradient-to-br ${domain.gradient} border ${domain.border} rounded-3xl p-8`}>
+      <motion.div
+        key={`header-${activeTab}`}
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -12 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className={`bg-gradient-to-br ${domain.gradient} border ${domain.border} rounded-3xl p-8`}
+      >
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
           <div className={`w-16 h-16 rounded-2xl ${c.badge} border flex items-center justify-center flex-shrink-0 ${c.text}`}>
             {domain.icon}
@@ -829,7 +929,7 @@ const DomainsView = () => {
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Roadmap */}
@@ -924,6 +1024,7 @@ const DomainsView = () => {
           })}
         </div>
       </div>
+      </AnimatePresence>
     </div>
   );
 };
@@ -944,6 +1045,15 @@ const StudentPortal = () => {
   const location = useLocation();
   const path     = location.pathname;
 
+  const getKey = () => {
+    if (path.endsWith("/profile"))     return "profile";
+    if (path.endsWith("/progress"))    return "progress";
+    if (path.endsWith("/assignments")) return "assignments";
+    if (path.endsWith("/domains"))     return "domains";
+    if (path.endsWith("/mentor"))      return "mentor";
+    return "overview";
+  };
+
   const renderContent = () => {
     if (path.endsWith("/profile"))     return <ProfileView />;
     if (path.endsWith("/progress"))    return <FallbackView title="Progress Tracking" />;
@@ -953,7 +1063,21 @@ const StudentPortal = () => {
     return <OverviewView />;
   };
 
-  return <div className="w-full">{renderContent()}</div>;
+  return (
+    <div className="w-full">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={getKey()}
+          initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          exit={{ opacity: 0, y: -14, filter: 'blur(4px)' }}
+          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {renderContent()}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
 };
 
 export default StudentPortal;

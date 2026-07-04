@@ -103,7 +103,7 @@ const DashboardLayout = React.memo(({ menuItems = [], role = "User" }) => {
               <Menu className="w-6 h-6" />
             </button>
             <h1 className="text-xl sm:text-2xl font-bold text-white hidden sm:block">
-              Welcome back, {user?.name?.split(" ")[0] ?? role}! 👋
+              Welcome, {user?.name?.split(" ")[0] ?? role}.
             </h1>
           </div>
 
