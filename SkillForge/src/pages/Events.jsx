@@ -145,12 +145,6 @@ const Events = () => {
           <motion.div variants={fadeUp} className="w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-500 mx-auto rounded-full mt-8" />
         </motion.div>
 
-        {isOffline && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto mb-12 px-6 py-4 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-sm flex items-center justify-center gap-3">
-            <AlertCircle className="w-5 h-5 flex-shrink-0 animate-pulse text-amber-400" />
-            <span><strong>Demo Mode:</strong> Showing offline mock events.</span>
-          </motion.div>
-        )}
 
         <div className="mb-20">
           <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="flex items-center gap-3 mb-8">

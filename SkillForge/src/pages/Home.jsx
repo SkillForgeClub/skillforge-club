@@ -282,15 +282,7 @@ const Home = React.memo(() => {
       {/* Content wrapper */}
       <div className="relative z-20 bg-[#0B1121]/90 border-t border-white/5 pb-32" style={{ contain: 'layout style paint' }}>
 
-        {/* Offline notice */}
-        {(isBackendOffline || isProjectsOffline) && (
-          <div className="max-w-4xl mx-auto mt-12 px-6 py-4 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-sm flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(245,158,11,0.05)] relative z-30">
-            <AlertCircle className="w-5 h-5 flex-shrink-0 animate-pulse text-amber-400" />
-            <span>
-              <strong>Demo Mode:</strong> The frontend cannot connect to the backend server (at <code className="bg-slate-950 px-1.5 py-0.5 rounded font-mono text-xs text-white">http://localhost:5000</code>). Some sections are showing mock data.
-            </span>
-          </div>
-        )}
+
 
         {/* ABOUT SECTION: Purpose, Vision, Mission */}
         <section id="about" className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-white/5 scroll-mt-20">
