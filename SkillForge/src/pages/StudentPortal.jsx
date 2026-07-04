@@ -457,7 +457,7 @@ const AssignmentsView = () => {
   if (noMentorMessage) {
     return (
       <div className="space-y-6">
-        <h2 className="text-3xl font-black text-white border-b border-white/10 pb-4">Assignments</h2>
+        <h2 className="text-3xl font-black text-white border-b border-white/10 pb-4">Assigned Tasks</h2>
         <p className="text-slate-500 text-sm">{noMentorMessage}</p>
       </div>
     );
@@ -468,7 +468,7 @@ const AssignmentsView = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-black text-white border-b border-white/10 pb-4">Assignments</h2>
+      <h2 className="text-3xl font-black text-white border-b border-white/10 pb-4">Assigned Tasks</h2>
 
       <div className="space-y-3">
         <h3 className="text-lg font-bold text-amber-400">Pending ({pending.length})</h3>
