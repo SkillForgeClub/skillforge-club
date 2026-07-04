@@ -472,14 +472,14 @@ const AssignmentsView = () => {
 
       <div className="space-y-3">
         <h3 className="text-lg font-bold text-amber-400">Pending ({pending.length})</h3>
-        {pending.length === 0 && <p className="text-slate-500">All caught up! ??</p>}
+        {pending.length === 0 && <p className="text-slate-500">All caught up! 🎉</p>}
         {pending.map((task) => (
           <div key={task.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-slate-800/80 transition-colors">
             <div className="flex items-center gap-4">
               <Clock className="w-6 h-6 text-amber-400 flex-shrink-0" />
               <div>
                 <h4 className="font-semibold text-white">{task.title}</h4>
-                <p className="text-sm text-slate-400">Deadline: <span className={task.type === "urgent" ? "text-rose-400 font-bold" : ""}>{task.deadline}</span> � {task.domain}</p>
+                <p className="text-sm text-slate-400">Deadline: <span className={task.type === "urgent" ? "text-rose-400 font-bold" : ""}>{task.deadline}</span> · {task.domain}</p>
               </div>
             </div>
             <button onClick={() => markDone(task.id)} className="px-4 py-2 text-xs font-bold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-slate-900 transition-all">
