@@ -1,7 +1,8 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Settings, BrainCircuit, Rocket, BookOpen, Calendar, Users, MessageSquare, LogIn, ChevronRight, CheckCircle2, ChevronDown, MonitorPlay, Code2, Sparkles, Mail, Phone, MapPin, Send, Code, Cpu, Smartphone } from 'lucide-react';
+import { Settings, BrainCircuit, Rocket, BookOpen, Calendar, Users, MessageSquare, LogIn, ChevronRight, CheckCircle2, ChevronDown, MonitorPlay, Code2, Sparkles, Mail, Phone, MapPin, Send, Code, Cpu, Smartphone, AlertCircle } from 'lucide-react';
+import { api } from '../api';
 import skillForgeLogo from '../assets/logo.png';
 import campusBg from '../assets/campus.png';
 
@@ -144,17 +145,15 @@ const Home = React.memo(() => {
   }, [displayProjects, activeProj]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/events')
-      .then((r) => {
-        if (!r.ok) throw new Error();
-        return r.json();
-      })
+    // Use the centralized api.js which respects VITE_API_URL for production
+    api.getEvents()
       .then((data) => {
         if (Array.isArray(data)) {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           const upcoming = data.filter((e) => {
-            const parts = e.date.split('-');
+            const parts = (e.date || '').split('-');
+            if (parts.length < 3) return false;
             const d = new Date(parts[0], parts[1] - 1, parts[2]);
             return d >= today;
           });
@@ -166,11 +165,7 @@ const Home = React.memo(() => {
         setIsBackendOffline(true);
       });
 
-    fetch('http://localhost:5000/api/projects?featured=true')
-      .then((r) => {
-        if (!r.ok) throw new Error();
-        return r.json();
-      })
+    api.getProjects()
       .then((data) => {
         if (Array.isArray(data)) {
           setFeaturedProjects(data);
