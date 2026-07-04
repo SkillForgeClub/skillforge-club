@@ -242,12 +242,10 @@ const Home = React.memo(() => {
           <motion.div variants={logoVariants} className="relative mb-10 w-48 h-48">
             {/* Subtle background glow */}
             <div className="absolute inset-0 bg-cyan-500/10 rounded-full blur-2xl -z-10" />
-            <motion.img
-              animate={{ y: [0, -8, 0] }}
-              transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+            <img
               src={skillForgeLogo}
               alt="SkillForge Logo"
-              className="relative z-10 w-full h-full object-contain opacity-90 drop-shadow-[0_0_15px_rgba(6,182,212,0.25)]"
+              className="relative z-10 w-full h-full object-contain opacity-90 drop-shadow-[0_0_15px_rgba(6,182,212,0.25)] animate-float"
               loading="eager"
             />
           </motion.div>
