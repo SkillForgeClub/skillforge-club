@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import logoImage from '../assets/logo.png';
 
 const Navbar = React.memo(() => {
@@ -34,35 +33,13 @@ const Navbar = React.memo(() => {
     }
   }, [location.hash]);
 
-  // Lock body scroll when mobile menu is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
-
   return (
-    <nav className="fixed w-full z-50 bg-slate-950/75 backdrop-blur-md border-b border-white/5 top-0" style={{ contain: 'layout style' }}>
+    <nav className="fixed w-full z-50 bg-slate-950/75 backdrop-blur-md border-b border-white/5 top-0" style={{ contain: 'layout style paint' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ willChange: 'transform' }}>
         <div className="flex items-center justify-between h-20">
           
-          {/* Brand Logo on Left - logo only */}
-          <div className="hidden md:flex items-center justify-start w-[200px]">
-            <Link to="/" className="flex items-center group">
-              <motion.img 
-                whileHover={{ rotate: 12, scale: 1.15 }}
-                transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                src={logoImage} 
-                alt="SkillForge Logo" 
-                className="h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(6,182,212,0.3)] group-hover:drop-shadow-[0_0_18px_rgba(6,182,212,0.6)] transition-all duration-300" 
-              />
-            </Link>
-          </div>
+          {/* Desktop Left Spacer (Balances Login button width to perfectly center links) */}
+          <div className="hidden md:block w-[110px]"></div>
 
           {/* Centered Desktop Nav Links */}
           <div className="hidden md:flex flex-1 justify-center items-center">
@@ -73,23 +50,16 @@ const Navbar = React.memo(() => {
                   <Link
                     key={link.name}
                     to={link.path}
-                    className={`px-3 py-2 text-base lg:text-lg font-semibold transition-all duration-300 relative group ${
+                    className={`px-3 py-2 text-base lg:text-lg font-medium transition-all duration-300 relative group ${
                       isActive
                         ? 'text-cyan-400'
                         : 'text-gray-300 hover:text-white'
                     }`}
                   >
                     {link.name}
-                    {isActive && (
-                      <motion.span
-                        layoutId="navActiveLine"
-                        className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full"
-                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                      />
-                    )}
-                    {!isActive && (
-                      <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-cyan-400/50 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-full" />
-                    )}
+                    <span className={`absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-cyan-400 to-blue-500 transition-transform duration-300 origin-center ${
+                      isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                    }`} />
                   </Link>
                 );
               })}
@@ -97,10 +67,10 @@ const Navbar = React.memo(() => {
           </div>
 
           {/* Right Login Button */}
-          <div className="hidden md:flex justify-end w-[200px]">
+          <div className="hidden md:flex justify-end w-[110px]">
             <Link
               to="/login"
-              className="px-6 py-2 rounded-full text-base font-bold bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 text-slate-950 hover:opacity-90 hover:scale-105 active:scale-95 transition-all duration-200 shadow-[0_0_20px_rgba(6,182,212,0.25)]"
+              className="px-6 py-2.5 rounded-full text-base font-bold bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 text-slate-950 hover:opacity-90 hover:scale-105 active:scale-95 transition-all duration-200 shadow-[0_0_20px_rgba(6,182,212,0.25)]"
             >
               Login
             </Link>
@@ -108,9 +78,7 @@ const Navbar = React.memo(() => {
 
           {/* Mobile Layout */}
           <div className="md:hidden flex items-center justify-between w-full">
-            <Link to="/" onClick={closeMenu} className="flex items-center">
-              <img src={logoImage} alt="SkillForge Logo" className="h-10 w-auto object-contain drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]" />
-            </Link>
+            <div></div> {/* Spacer to push button to right */}
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="inline-flex items-center justify-center p-2.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 border border-white/5 hover:border-white/15 focus:outline-none transition-all duration-200"
@@ -121,60 +89,38 @@ const Navbar = React.memo(() => {
         </div>
       </div>
 
-      {/* Mobile Animated Dropdown and Backdrop */}
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Backdrop Overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={closeMenu}
-              className="fixed inset-0 top-20 z-40 bg-slate-950/60 backdrop-blur-sm md:hidden"
-            />
-
-            {/* Dropdown Panel */}
-            <motion.div
-              initial={{ opacity: 0, height: 0, y: -10 }}
-              animate={{ opacity: 1, height: 'auto', y: 0 }}
-              exit={{ opacity: 0, height: 0, y: -10 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
-              className="md:hidden absolute top-20 left-0 w-full bg-slate-950/95 backdrop-blur-xl border-b border-white/5 z-50 overflow-hidden"
-            >
-              <div className="px-4 pt-2 pb-6 space-y-2">
-                {navLinks.map((link) => {
-                  const isActive = location.pathname === link.path || (location.pathname === '/' && location.hash === link.path.replace('/', ''));
-                  return (
-                    <Link
-                      key={link.name}
-                      to={link.path}
-                      onClick={closeMenu}
-                      className={`block px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200 ${
-                        isActive
-                          ? 'text-cyan-400 bg-cyan-500/10 border border-cyan-500/20'
-                          : 'text-gray-300 hover:text-white hover:bg-white/5 border border-transparent'
-                      }`}
-                    >
-                      {link.name}
-                    </Link>
-                  );
-                })}
-                <div className="pt-4 border-t border-white/5">
-                  <Link
-                    to="/login"
-                    onClick={closeMenu}
-                    className="block w-full py-3.5 rounded-xl text-center text-lg font-bold bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 text-slate-950 hover:opacity-90 transition-opacity duration-200"
-                  >
-                    Login
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      {isOpen && (
+        <div className="md:hidden absolute top-20 left-0 w-full bg-slate-950/95 backdrop-blur-xl border-b border-white/5 transition-all duration-300">
+          <div className="px-4 pt-2 pb-6 space-y-2">
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.path || (location.pathname === '/' && location.hash === link.path.replace('/', ''));
+              return (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  onClick={closeMenu}
+                  className={`block px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200 ${
+                    isActive
+                      ? 'text-cyan-400 bg-cyan-500/10 border border-cyan-500/20'
+                      : 'text-gray-300 hover:text-white hover:bg-white/5 border border-transparent'
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
+            <div className="pt-4 border-t border-white/5">
+              <Link
+                to="/login"
+                onClick={closeMenu}
+                className="block w-full py-3.5 rounded-xl text-center text-lg font-bold bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 text-slate-950 hover:opacity-90 transition-opacity duration-200"
+              >
+                Login
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 });

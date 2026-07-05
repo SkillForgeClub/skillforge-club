@@ -3,8 +3,7 @@ import { useLocation } from "react-router-dom";
 import { Users, UserCheck, FileText, TrendingUp, Search, Plus, Loader2, Trash2, Check, Send, MessageSquare } from "lucide-react";
 import { getTokenFor } from "../auth";
 
-import { API_BASE } from "../config";
-const BASE = API_BASE;
+const BASE = "http://localhost:5000/api";
 const authFetch = async (path, opts = {}) => {
   const res = await fetch(`${BASE}${path}`, {
     ...opts,
@@ -36,13 +35,13 @@ const OverviewView = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
-          <div key={idx} className={`bg-slate-900/50 border border-white/10 rounded-2xl p-6 bg-gradient-to-br ${stat.color} to-transparent hover:border-white/20 transition-all group`}>
+          <div key={idx} className={`bg-slate-900/50 border border-white/10 rounded-2xl p-6 bg-gradient-to-br ${stat.color} to-transparent hover:border-white/20 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/20 transition-all duration-300 ease-out group`}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-400 text-sm font-medium mb-1">{stat.title}</p>
-                <h3 className="text-3xl font-black text-white">{stat.value}</h3>
+                <h3 className="text-3xl font-black text-white tracking-tight">{stat.value}</h3>
               </div>
-              <div className="p-3 bg-slate-800/50 rounded-xl group-hover:scale-110 transition-transform">{stat.icon}</div>
+              <div className="p-3 bg-slate-800/50 rounded-xl group-hover:scale-110 transition-transform duration-300 shrink-0">{stat.icon}</div>
             </div>
           </div>
         ))}
@@ -96,28 +95,29 @@ const StudentsView = () => {
         <div className="relative">
           <Search className="w-5 h-5 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} type="text" placeholder="Search students..."
-            className="bg-slate-900 border border-white/10 text-sm rounded-full pl-12 pr-4 py-3 text-white outline-none focus:border-cyan-500 w-full sm:w-72 transition-colors" />
+            className="field-input rounded-full pl-12 pr-4 py-3 text-sm w-full sm:w-72" />
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-16 text-slate-500">
-          {students.length === 0 ? "No students assigned yet." : "No students match your search."}
+        <div className="empty-state">
+          <div className="empty-state-icon"><Search className="w-5 h-5" /></div>
+          <p className="font-medium text-slate-400">{students.length === 0 ? "No students assigned yet" : "No students match your search"}</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[500px]">
+        <div className="table-shell">
+          <table className="min-w-[500px]">
             <thead>
-              <tr className="border-b border-white/10 text-slate-400 text-sm">
-                <th className="pb-4 font-semibold pl-4">Student</th>
-                <th className="pb-4 font-semibold">Domain</th>
-                <th className="pb-4 font-semibold">Joined</th>
+              <tr>
+                <th className="pl-4">Student</th>
+                <th>Domain</th>
+                <th>Joined</th>
               </tr>
             </thead>
             <tbody className="text-sm">
               {filtered.map((s) => (
                 <React.Fragment key={s.id}>
-                  <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                  <tr className="border-b border-white/5 hover:bg-white/[0.04] transition-colors duration-150">
                     <td className="py-4 pl-4">
                       <div className="flex items-center gap-4">
                         <button type="button" onClick={() => toggleExpanded(s.id)}
@@ -222,19 +222,19 @@ const AssignTasksView = () => {
               <label className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-2 block">{label}</label>
               <input required={["title", "deadline"].includes(key)} type={type} placeholder={placeholder}
                 value={form[key]} onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                className="w-full bg-slate-900 border border-white/10 rounded-xl px-5 py-3.5 text-white outline-none focus:border-purple-500 transition-all" />
+                className="field-input px-5 py-3.5" />
             </div>
           ))}
           <div>
             <label className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-2 block">Description</label>
             <textarea rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="Provide precise instructions..."
-              className="w-full bg-slate-900 border border-white/10 rounded-xl px-5 py-3.5 text-white outline-none focus:border-purple-500 transition-all resize-none" />
+              className="field-input px-5 py-3.5 resize-none" />
           </div>
           <div>
             <label className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-2 block">Assign To</label>
             <select value={form.assignedTo} onChange={(e) => setForm({ ...form, assignedTo: e.target.value })}
-              className="w-full bg-slate-900 border border-white/10 rounded-xl px-5 py-3.5 text-white outline-none focus:border-purple-500 transition-all">
+              className="field-input px-5 py-3.5">
               <option value="all">All Students</option>
               {students.map((s) => <option key={s.id} value={s.id}>{s.name} — {s.email}</option>)}
             </select>
@@ -382,7 +382,7 @@ const MessagesView = () => {
           <div className="relative">
             <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search students..."
-              className="w-full bg-slate-900 border border-white/10 text-sm rounded-full pl-9 pr-4 py-2.5 text-white outline-none focus:border-cyan-500 transition-colors" />
+              className="field-input rounded-full pl-9 pr-4 py-2.5 text-sm" />
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
@@ -464,7 +464,7 @@ const MessagesView = () => {
 
             <form onSubmit={handleSend} className="flex items-center gap-3 px-6 py-4 border-t border-white/5 bg-[#1e293b]/60">
               <input value={text} onChange={(e) => setText(e.target.value)} placeholder={`Message ${selected.name}...`}
-                className="flex-1 bg-slate-900 border border-white/10 rounded-full px-5 py-3 text-white text-sm outline-none focus:border-cyan-500 transition-colors" />
+                className="field-input rounded-full flex-1 px-5 py-3 text-sm" />
               <button type="submit" disabled={!text.trim() || sending}
                 className="w-11 h-11 rounded-full bg-cyan-500 hover:bg-cyan-400 disabled:opacity-40 flex items-center justify-center transition-colors flex-shrink-0">
                 {sending ? <Loader2 className="animate-spin w-4 h-4 text-slate-950" /> : <Send className="w-4 h-4 text-slate-950" />}

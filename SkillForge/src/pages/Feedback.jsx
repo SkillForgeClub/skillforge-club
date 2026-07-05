@@ -64,7 +64,7 @@ const Feedback = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Anonymous Developer"
-                className="w-full bg-slate-800/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all"
+                className="field-input px-4 py-3"
               />
             </div>
 
@@ -101,7 +101,7 @@ const Feedback = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="What could we do better?"
-                className="w-full bg-slate-800/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 transition-all resize-none"
+                className="field-input px-4 py-3 resize-none"
               />
             </div>
 

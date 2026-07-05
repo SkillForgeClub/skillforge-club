@@ -8,8 +8,7 @@ import {
 } from "lucide-react";
 import { getTokenFor } from "../auth";
 
-import { API_BASE } from "../config";
-const BASE = API_BASE;
+const BASE = "http://localhost:5000/api";
 
 const authFetch = async (path, opts = {}) => {
   const res = await fetch(`${BASE}${path}`, {
@@ -21,13 +20,13 @@ const authFetch = async (path, opts = {}) => {
 };
 
 const StatCard = ({ title, value, icon, color }) => (
-  <div className={`bg-slate-900/50 border border-white/10 rounded-2xl p-6 bg-gradient-to-br ${color} to-transparent hover:border-white/20 transition-all`}>
+  <div className={`bg-slate-900/50 border border-white/10 rounded-2xl p-6 bg-gradient-to-br ${color} to-transparent hover:border-white/20 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/20 transition-all duration-300 ease-out`}>
     <div className="flex items-center justify-between">
       <div>
         <p className="text-slate-400 text-sm font-medium mb-1">{title}</p>
-        <h3 className="text-3xl font-black text-white">{value ?? ""}</h3>
+        <h3 className="text-3xl font-black text-white tracking-tight">{value ?? ""}</h3>
       </div>
-      <div className="p-3 bg-slate-800/50 rounded-xl">{icon}</div>
+      <div className="p-3 bg-slate-800/50 rounded-xl shrink-0">{icon}</div>
     </div>
   </div>
 );
@@ -52,7 +51,7 @@ const TableShell = ({ title, cols, rows, loading, onAdd, addLabel, search, setSe
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={searchPlaceholder}
-            className="bg-slate-900 border border-white/10 text-sm rounded-full pl-9 pr-4 py-2.5 text-white outline-none focus:border-cyan-500 w-64 transition-colors"
+            className="field-input rounded-full pl-9 pr-4 py-2.5 text-sm w-64"
           />
         </div>
         {onAdd && (
@@ -62,18 +61,24 @@ const TableShell = ({ title, cols, rows, loading, onAdd, addLabel, search, setSe
         )}
       </div>
     </div>
-    <div className="overflow-x-auto">
-      <table className="w-full text-left border-collapse min-w-[600px]">
+    <div className="table-shell">
+      <table className="min-w-[600px]">
         <thead>
-          <tr className="border-b border-white/10 text-slate-400 text-xs uppercase tracking-wider bg-slate-900/50">
-            {cols.map((c) => <th key={c} className="py-4 px-4 font-semibold">{c}</th>)}
+          <tr>
+            {cols.map((c) => <th key={c}>{c}</th>)}
           </tr>
         </thead>
         <tbody className="text-sm">
           {loading ? (
-            <tr><td colSpan={cols.length} className="py-16 text-center text-slate-500"><Loader2 className="animate-spin inline" /></td></tr>
+            <tr><td colSpan={cols.length} className="py-16 text-center text-slate-500"><Loader2 className="animate-spin inline w-5 h-5" /></td></tr>
           ) : rows.length === 0 ? (
-            <tr><td colSpan={cols.length} className="py-16 text-center text-slate-500">No data found.</td></tr>
+            <tr><td colSpan={cols.length} className="p-0">
+              <div className="empty-state">
+                <div className="empty-state-icon"><Search className="w-5 h-5" /></div>
+                <p className="font-medium text-slate-400">No data found</p>
+                <p className="text-xs text-slate-600">Try adjusting your search or check back later.</p>
+              </div>
+            </td></tr>
           ) : rows}
         </tbody>
       </table>
@@ -230,7 +235,7 @@ const MembersTab = () => {
               value={assignedMentor?.id ?? ""}
               onChange={(e) => { if (e.target.value) openModal(m, assignedMentor, e.target.value); }}
               disabled={assigning === m.id}
-              className="bg-slate-800 border border-white/10 text-xs rounded-lg px-3 py-2 text-white outline-none focus:border-cyan-500 transition-all disabled:opacity-50"
+              className="field-input rounded-lg px-3 py-2 text-xs disabled:opacity-50"
             >
               <option value="" disabled>Assign mentor...</option>
               {mentors.map((mentor) => (
@@ -432,13 +437,13 @@ const EventsTab = () => {
                 <label className="text-xs text-slate-400 font-semibold uppercase">{label}</label>
                 <input type={type} required={required} value={form[key]}
                   onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                  className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-all text-sm" />
+                  className="field-input px-4 py-3 text-sm" />
               </div>
             ))}
             <div className="sm:col-span-2 space-y-1">
               <label className="text-xs text-slate-400 font-semibold uppercase">Description</label>
               <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3}
-                className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-all text-sm resize-none" />
+                className="field-input px-4 py-3 text-sm resize-none" />
             </div>
             {formError && <div className="sm:col-span-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">{formError}</div>}
             <div className="sm:col-span-2 flex gap-3 justify-end">
@@ -544,13 +549,13 @@ const ProjectsTab = () => {
                 <label className="text-xs text-slate-400 font-semibold uppercase">{label}</label>
                 <input required={required} value={form[k]}
                   onChange={(e) => setForm({ ...form, [k]: e.target.value })}
-                  className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-all text-sm" />
+                  className="field-input px-4 py-3 text-sm" />
               </div>
             ))}
             <div className="sm:col-span-2 space-y-1">
               <label className="text-xs text-slate-400 font-semibold uppercase">Description <span className="text-red-400">*</span></label>
               <textarea required value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3}
-                className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-all text-sm resize-none" />
+                className="field-input px-4 py-3 text-sm resize-none" />
             </div>
             {formError && <div className="sm:col-span-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">{formError}</div>}
             <div className="sm:col-span-2 flex gap-3 justify-end">
@@ -661,13 +666,13 @@ const TeamTab = () => {
               <div key={k} className="space-y-1">
                 <label className="text-xs text-slate-400 font-semibold uppercase">{label}</label>
                 <input required={["name","role"].includes(k)} value={form[k]} onChange={(e) => setForm({ ...form, [k]: e.target.value })}
-                  className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-all text-sm" />
+                  className="field-input px-4 py-3 text-sm" />
               </div>
             ))}
             <div className="sm:col-span-2 space-y-1">
               <label className="text-xs text-slate-400 font-semibold uppercase">Bio</label>
               <textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={2}
-                className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-all text-sm resize-none" />
+                className="field-input px-4 py-3 text-sm resize-none" />
             </div>
             <div className="sm:col-span-2 flex gap-3 justify-end">
               <button type="button" onClick={() => setShowForm(false)} className="px-6 py-2.5 rounded-xl bg-slate-700 text-slate-300 font-bold text-sm">Cancel</button>
@@ -737,7 +742,7 @@ const MessagesTab = () => {
         <div className="relative">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search messages..."
-            className="bg-slate-900 border border-white/10 text-sm rounded-full pl-9 pr-4 py-2.5 text-white outline-none focus:border-cyan-500 w-64 transition-colors" />
+            className="field-input rounded-full pl-9 pr-4 py-2.5 text-sm w-64" />
         </div>
       </div>
       <div className="flex gap-2">
@@ -755,22 +760,28 @@ const MessagesTab = () => {
           </button>
         ))}
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[500px]">
+      <div className="table-shell">
+        <table className="min-w-[500px]">
           <thead>
-            <tr className="border-b border-white/10 text-slate-400 text-xs uppercase tracking-wider bg-slate-900/50">
-              <th className="py-3 px-4">Name</th>
-              <th className="py-3 px-4">Email</th>
-              <th className="py-3 px-4">{subTab === "feedback" ? "Rating" : "Subject"}</th>
-              <th className="py-3 px-4">Date</th>
-              <th className="py-3 px-4">Actions</th>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>{subTab === "feedback" ? "Rating" : "Subject"}</th>
+              <th>Date</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody className="text-sm">
             {loading ? (
-              <tr><td colSpan={5} className="py-16 text-center text-slate-500"><Loader2 className="animate-spin inline" /></td></tr>
+              <tr><td colSpan={5} className="py-16 text-center text-slate-500"><Loader2 className="animate-spin inline w-5 h-5" /></td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={5} className="py-16 text-center text-slate-500">No {subTab} messages yet.</td></tr>
+              <tr><td colSpan={5} className="p-0">
+                <div className="empty-state">
+                  <div className="empty-state-icon"><Mail className="w-5 h-5" /></div>
+                  <p className="font-medium text-slate-400">No {subTab} messages yet</p>
+                  <p className="text-xs text-slate-600">New submissions will show up here.</p>
+                </div>
+              </td></tr>
             ) : filtered.map((m) => (
               <React.Fragment key={m.id}>
                 <tr onClick={() => handleRowClick(m.id)}

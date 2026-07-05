@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Phone, Rocket, BookOpen, Trophy, Target, Clock, CheckCircle2, MessageSquare, BrainCircuit, Code2, Loader2, User, CalendarCheck, ExternalLink, ChevronRight, Star, Layers, Globe, Database, Brain, Cpu, Shield, Smartphone, BarChart2, Send, Lock } from "lucide-react";
+import { Mail, Phone, Rocket, BookOpen, Trophy, Target, Clock, CheckCircle2, MessageSquare, BrainCircuit, Code2, Loader2, User, CalendarCheck, ExternalLink, ChevronRight, Star, Layers, Globe, Database, Brain, Cpu, Shield, Smartphone, BarChart2, Send } from "lucide-react";
 import { getTokenFor, getUser, logout } from "../auth";
+import ProgressRing from "../components/ProgressRing";
+import StreakWidget from "../components/StreakWidget";
+import ProfileCompletionCard from "../components/ProfileCompletionCard";
+import { OverviewSkeleton, CenteredPanelSkeleton, PanelSkeleton, SkeletonBlock } from "../components/Skeletons";
 
-// Shared animation variants
-const fadeUp = { initial: { opacity: 0, y: 22 }, animate: { opacity: 1, y: 0, transition: { duration: 0.38, ease: [0.16, 1, 0.3, 1] } }, exit: { opacity: 0, y: -14, transition: { duration: 0.2, ease: 'easeIn' } } };
-const sectionAnim = { initial: { opacity: 0, x: 18 }, animate: { opacity: 1, x: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }, exit: { opacity: 0, x: -18, transition: { duration: 0.18, ease: 'easeIn' } } };
-
-import { API_BASE } from "../config";
-const BASE = API_BASE;
+const BASE = "http://localhost:5000/api";
 const authFetch = async (path) => {
   const res = await fetch(`${BASE}${path}`, {
     headers: { Authorization: `Bearer ${getTokenFor("student")}` },
@@ -32,6 +30,7 @@ const OverviewView = () => {
         stats:            overview?.stats            ?? { totalProjects: 0, skillsLearned: 0, overallProgress: 0, tasksCompleted: 0 },
         progress:         overview?.progress         ?? [],
         assignments:      overview?.assignments      ?? [],
+        assignmentsMessage: overview?.assignmentsMessage ?? null,
         registeredEvents: overview?.registeredEvents ?? [],
         activity:         overview?.activity         ?? [],
         assignedMentor:   mentor ?? null,
@@ -54,83 +53,79 @@ const OverviewView = () => {
     }));
   };
 
-  if (loading || !data) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-cyan-400 w-8 h-8" /></div>;
+  if (loading || !data) return <OverviewSkeleton />;
 
   const stats = [
     { title: "Registered Events", value: data.stats.totalProjects, icon: <Rocket className="w-6 h-6 text-cyan-400" />, color: "from-cyan-500/20" },
     { title: "Skills Learned",    value: data.stats.skillsLearned, icon: <BookOpen className="w-6 h-6 text-purple-400" />, color: "from-purple-500/20" },
-    { title: "Overall Progress",  value: data.stats.overallProgress, icon: <Target className="w-6 h-6 text-blue-400" />, color: "from-blue-500/20" },
     { title: "Tasks Completed",   value: data.stats.tasksCompleted, icon: <Trophy className="w-6 h-6 text-yellow-400" />, color: "from-yellow-500/20" },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Stat Cards */}
+      {/* Stat Cards + Overall Progress ring */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
-          <div key={idx} className={`bg-slate-900/50 border border-white/10 rounded-2xl p-6 bg-gradient-to-br ${stat.color} to-transparent hover:border-white/20 transition-all group`}>
+          <div key={idx} className={`bg-slate-900/50 border border-white/10 rounded-2xl p-6 bg-gradient-to-br ${stat.color} to-transparent hover:border-white/20 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/20 transition-all duration-300 ease-out group`}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-slate-400 text-sm font-medium mb-1">{stat.title}</p>
-                <h3 className="text-3xl font-black text-white">{stat.value}</h3>
+                <h3 className="text-3xl font-black text-white tracking-tight">{stat.value}</h3>
               </div>
-              <div className="p-3 bg-slate-800/50 rounded-xl group-hover:scale-110 transition-transform">{stat.icon}</div>
+              <div className="p-3 bg-slate-800/50 rounded-xl group-hover:scale-110 transition-transform duration-300 shrink-0">{stat.icon}</div>
             </div>
           </div>
         ))}
+        <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-6 bg-gradient-to-br from-blue-500/20 to-transparent hover:border-white/20 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/20 transition-all duration-300 ease-out flex items-center gap-4">
+          <ProgressRing value={data.stats.overallProgress} size={72} strokeWidth={6} color="#38bdf8" />
+          <div>
+            <p className="text-slate-400 text-sm font-medium mb-1">Overall Progress</p>
+            <p className="text-xs text-slate-500">Across all assigned tasks</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Momentum: streak + profile completion */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <StreakWidget />
+        <ProfileCompletionCard profile={data.profile} assignedMentor={data.assignedMentor} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {/* Assignments — only visible if mentor is assigned */}
+          {/* Assignments */}
           <div className="bg-[#1e293b]/80 border border-white/5 rounded-2xl p-6 shadow-xl">
             <h3 className="text-xl font-bold text-white mb-6">Assigned Tasks</h3>
-            {!data.assignedMentor ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.97 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4 }}
-                className="flex flex-col items-center justify-center py-10 gap-4 text-center"
-              >
-                <div className="w-16 h-16 rounded-2xl bg-slate-800/80 border border-white/10 flex items-center justify-center">
-                  <Lock className="w-8 h-8 text-slate-500" />
-                </div>
-                <div>
-                  <p className="text-white font-bold text-base">Assignments</p>
-                  <p className="text-slate-400 text-sm mt-1 max-w-xs">No mentor has been assigned yet. Assignments will be available after mentor allocation.</p>
-                </div>
-              </motion.div>
+            {data.assignmentsMessage ? (
+              <p className="text-slate-500 text-sm">{data.assignmentsMessage}</p>
             ) : (
-              <div className="space-y-4">
-                {data.assignments.length === 0 ? (
-                  <p className="text-slate-500 text-sm text-center py-6">No tasks assigned yet. Your mentor will add tasks soon.</p>
-                ) : data.assignments.map((task) => (
-                  <motion.div key={task.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
-                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-slate-800/80 transition-colors gap-4">
-                    <div className="flex items-center gap-4">
-                      {task.type === "done" ? (
-                        <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
-                      ) : (
-                        <Clock className="w-6 h-6 text-blue-400 flex-shrink-0" />
-                      )}
-                      <div>
-                        <h4 className="font-semibold text-white">{task.title}</h4>
-                        <p className="text-sm text-slate-400">Deadline: <span className={task.type === "urgent" ? "text-rose-400 font-bold" : ""}>{task.deadline}</span></p>
-                      </div>
+            <div className="space-y-4">
+              {data.assignments.map((task) => (
+                <div key={task.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-slate-800/80 transition-colors gap-4">
+                  <div className="flex items-center gap-4">
+                    {task.type === "done" ? (
+                      <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
+                    ) : (
+                      <Clock className="w-6 h-6 text-blue-400 flex-shrink-0" />
+                    )}
+                    <div>
+                      <h4 className="font-semibold text-white">{task.title}</h4>
+                      <p className="text-sm text-slate-400">Deadline: <span className={task.type === "urgent" ? "text-rose-400 font-bold" : ""}>{task.deadline}</span></p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`px-3 py-1 text-xs font-bold rounded-full ${task.status === "Completed" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
-                        {task.status}
-                      </span>
-                      {task.status !== "Completed" && (
-                        <button onClick={() => markDone(task.id)} className="px-3 py-1 text-xs font-bold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-slate-900 transition-all">
-                          Mark Done
-                        </button>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-3 py-1 text-xs font-bold rounded-full ${task.status === "Completed" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
+                      {task.status}
+                    </span>
+                    {task.status !== "Completed" && (
+                      <button onClick={() => markDone(task.id)} className="px-3 py-1 text-xs font-bold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-slate-900 transition-all">
+                        Mark Done
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
             )}
           </div>
         </div>
@@ -238,7 +233,7 @@ const ProfileView = () => {
     fetchProfile();
   }, [fetchProfile]);
 
-  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-cyan-400 w-8 h-8" /></div>;
+  if (loading) return <CenteredPanelSkeleton />;
   if (!profile) return <div className="text-center text-slate-400 py-20">Could not load profile. Please try again.</div>;
 
   const initials = profile.name?.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2) ?? "??";
@@ -275,15 +270,14 @@ const ProfileView = () => {
           Authorization: `Bearer ${getTokenFor("student")}`
         },
         body: JSON.stringify({
-          name: editForm.name.trim(),
+          name: editForm.name,
           domain_interest: editForm.domains.join(", ")
         })
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Update failed");
+      if (!res.ok) throw new Error();
       
-      // Use the returned student data directly — no extra fetch needed
-      setProfile(json.student ?? { ...profile, name: editForm.name.trim(), domain_interest: editForm.domains.join(", ") });
+      const updated = await authFetch("/student/profile");
+      setProfile(updated);
       setSaveStatus("success");
       setIsEditing(false);
     } catch {
@@ -312,12 +306,14 @@ const ProfileView = () => {
                 <p className="text-slate-400 font-medium text-sm">{profile.email}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-2 max-w-md">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
                 {[
                   { label: "My Domains", value: domainList.length, color: "text-cyan-400" },
+                  { label: "Registered Events", value: profile.totalProjects, color: "text-purple-400" },
+                  { label: "Year Level", value: "Sophomore", color: "text-white" },
                   { label: "Joined Year", value: new Date(profile.created_at || profile.createdAt).getFullYear(), color: "text-yellow-400" },
                 ].map(({ label, value, color }) => (
-                  <div key={label} className="bg-slate-900/50 border border-white/5 rounded-2xl p-4 flex flex-col justify-center items-center min-h-[85px] overflow-hidden">
+                  <div key={label} className="bg-slate-900/50 border border-white/5 rounded-2xl p-4 flex flex-col justify-center items-center min-h-[85px] overflow-hidden hover:border-white/15 hover:bg-slate-900/70 transition-all duration-200">
                     <span className={`block font-black ${color} mb-0.5 leading-none text-center ${
                       typeof value === "string" && value.length > 7
                         ? "text-xs sm:text-sm md:text-base"
@@ -386,7 +382,7 @@ const ProfileView = () => {
                 type="text"
                 value={editForm.name}
                 onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors"
+                className="field-input px-4 py-3"
                 placeholder="Full Name"
                 required
               />
@@ -445,19 +441,23 @@ const ProfileView = () => {
 
 // -- Assignments ---------------------------------------------------------------
 const AssignmentsView = () => {
-  const [data, setData]         = useState([]);
-  const [mentor, setMentor]     = useState(null);
-  const [loading, setLoading]   = useState(true);
+  const [data, setData]       = useState([]);
+  const [noMentorMessage, setNoMentorMessage] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      authFetch("/student/assignments"),
-      authFetch("/assignments/my-mentor"),
-    ]).then(([assignments, mentorData]) => {
-      setData(Array.isArray(assignments) ? assignments : []);
-      setMentor(mentorData && mentorData.id ? mentorData : null);
+    authFetch("/student/assignments").then((d) => {
+      // Backend now returns { hasMentor, message, assignments } instead of a
+      // bare array so the UI can tell "no mentor yet" apart from "no tasks".
+      if (d && Array.isArray(d.assignments)) {
+        setData(d.assignments);
+        setNoMentorMessage(d.hasMentor ? null : d.message);
+      } else {
+        setData(Array.isArray(d) ? d : []);
+        setNoMentorMessage(null);
+      }
       setLoading(false);
-    }).catch(() => setLoading(false));
+    });
   }, []);
 
   const markDone = async (id) => {
@@ -468,97 +468,63 @@ const AssignmentsView = () => {
     setData((prev) => prev.map((a) => a.id === id ? { ...a, status: "Completed", type: "done" } : a));
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-cyan-400 w-8 h-8" /></div>;
-
-  // No mentor → show locked state
-  if (!mentor) return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-      className="space-y-6"
-    >
-      <h2 className="text-3xl font-black text-white border-b border-white/10 pb-4">Assignments</h2>
-      <div className="flex flex-col items-center justify-center py-20 gap-6 text-center">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.1, duration: 0.5, type: "spring", stiffness: 200 }}
-          className="w-24 h-24 rounded-3xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 flex items-center justify-center shadow-2xl"
-        >
-          <Lock className="w-12 h-12 text-slate-400" />
-        </motion.div>
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.4 }}>
-          <p className="text-white font-black text-2xl mb-3">Assignments</p>
-          <p className="text-slate-400 text-base max-w-sm leading-relaxed">
-            No mentor has been assigned yet.<br />
-            <span className="text-slate-500 text-sm">Assignments will be available after mentor allocation.</span>
-          </p>
-        </motion.div>
-      </div>
-    </motion.div>
+  if (loading) return (
+    <div className="space-y-6">
+      <SkeletonBlock className="h-9 w-48" />
+      <PanelSkeleton rows={3} title={false} />
+    </div>
   );
+
+  if (noMentorMessage) {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-3xl font-black text-white border-b border-white/10 pb-4">Assignments</h2>
+        <p className="text-slate-500 text-sm">{noMentorMessage}</p>
+      </div>
+    );
+  }
 
   const pending   = data.filter((a) => a.status !== "Completed");
   const completed = data.filter((a) => a.status === "Completed");
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className="space-y-6"
-    >
+    <div className="space-y-6">
       <h2 className="text-3xl font-black text-white border-b border-white/10 pb-4">Assignments</h2>
 
       <div className="space-y-3">
         <h3 className="text-lg font-bold text-amber-400">Pending ({pending.length})</h3>
-        {data.length === 0 && <p className="text-slate-500">No tasks are assigned yet</p>}
-        {data.length > 0 && pending.length === 0 && <p className="text-slate-500">No tasks are pending, contact your mentor for new tasks</p>}
-        {pending.map((task, i) => (
-          <motion.div
-            key={task.id}
-            initial={{ opacity: 0, x: -12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: i * 0.05 }}
-            className="flex items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-slate-800/80 hover:border-amber-500/20 transition-all"
-          >
+        {pending.length === 0 && <p className="text-slate-500">All caught up! ??</p>}
+        {pending.map((task) => (
+          <div key={task.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-slate-800/80 transition-colors">
             <div className="flex items-center gap-4">
               <Clock className="w-6 h-6 text-amber-400 flex-shrink-0" />
               <div>
                 <h4 className="font-semibold text-white">{task.title}</h4>
-                <p className="text-sm text-slate-400">Deadline: <span className={task.type === "urgent" ? "text-rose-400 font-bold" : ""}>{task.deadline}</span> · {task.domain}</p>
+                <p className="text-sm text-slate-400">Deadline: <span className={task.type === "urgent" ? "text-rose-400 font-bold" : ""}>{task.deadline}</span> � {task.domain}</p>
               </div>
             </div>
             <button onClick={() => markDone(task.id)} className="px-4 py-2 text-xs font-bold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-slate-900 transition-all">
               Mark Done
             </button>
-          </motion.div>
+          </div>
         ))}
       </div>
 
       <div className="space-y-3">
         <h3 className="text-lg font-bold text-emerald-400">Completed ({completed.length})</h3>
-        {completed.map((task, i) => (
-          <motion.div
-            key={task.id}
-            initial={{ opacity: 0, x: -12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: i * 0.05 }}
-            className="flex items-center gap-4 p-4 rounded-xl bg-slate-900/30 border border-white/5 opacity-70"
-          >
+        {completed.map((task) => (
+          <div key={task.id} className="flex items-center gap-4 p-4 rounded-xl bg-slate-900/30 border border-white/5 opacity-70">
             <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
             <div>
               <h4 className="font-semibold text-white line-through">{task.title}</h4>
               <p className="text-sm text-slate-500">{task.domain}</p>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
-    </motion.div>
+    </div>
   );
 };
-
 
 // -- Mentor View ---------------------------------------------------------------
 const MentorView = () => {
@@ -572,7 +538,12 @@ const MentorView = () => {
     }).catch(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-cyan-400 w-8 h-8" /></div>;
+  if (loading) return (
+    <div className="space-y-6 max-w-2xl mx-auto">
+      <SkeletonBlock className="h-9 w-40" />
+      <SkeletonBlock className="h-64 rounded-[2rem]" />
+    </div>
+  );
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
@@ -601,33 +572,43 @@ const MentorView = () => {
               </div>
             ))}
           </div>
-            <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-6 space-y-4">
-              <p className="text-slate-400 text-sm leading-relaxed">Your mentor is here to guide your learning journey. Reach out for feedback or to schedule a session:</p>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                {/* Email Button */}
-                <a
-                  href={`mailto:${mentor.email}`}
-                  className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-950/40 border border-white/5 hover:border-cyan-500/30 hover:bg-slate-950/80 transition-all group text-center"
-                >
-                  <Mail className="w-6 h-6 text-cyan-400 mb-2 group-hover:scale-110 transition-transform" />
-                  <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Email</span>
-                  <span className="text-white text-xs font-semibold mt-1 truncate max-w-full">{mentor.email}</span>
-                </a>
+          <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-6 space-y-4">
+            <p className="text-slate-400 text-sm leading-relaxed">Your mentor is here to guide your learning journey. Reach out for feedback or to schedule a session using the channels below:</p>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+              {/* Email Button */}
+              <a
+                href={`mailto:${mentor.email}`}
+                className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-950/40 border border-white/5 hover:border-cyan-500/30 hover:bg-slate-950/80 transition-all group text-center"
+              >
+                <Mail className="w-6 h-6 text-cyan-400 mb-2 group-hover:scale-110 transition-transform" />
+                <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Email</span>
+                <span className="text-white text-xs font-semibold mt-1 truncate max-w-full">{mentor.email}</span>
+              </a>
 
-                {/* WhatsApp Button */}
-                <a
-                  href={`https://wa.me/?text=Hi%20${encodeURIComponent(mentor.name)}!%20I'm%20a%20student%20from%20SkillForge.`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-950/40 border border-white/5 hover:border-green-400/30 hover:bg-slate-950/80 transition-all group text-center"
-                >
-                  <MessageSquare className="w-6 h-6 text-green-400 mb-2 group-hover:scale-110 transition-transform" />
-                  <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">WhatsApp</span>
-                  <span className="text-white text-xs font-semibold mt-1">Chat on WhatsApp</span>
-                </a>
-              </div>
+              {/* Phone Button */}
+              <a
+                href="tel:+919876543210"
+                className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-950/40 border border-white/5 hover:border-emerald-500/30 hover:bg-slate-950/80 transition-all group text-center"
+              >
+                <Phone className="w-6 h-6 text-emerald-400 mb-2 group-hover:scale-110 transition-transform" />
+                <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Phone</span>
+                <span className="text-white text-xs font-semibold mt-1">+91 98765 43210</span>
+              </a>
+
+              {/* WhatsApp Button */}
+              <a
+                href="https://wa.me/919876543210?text=Hi%20Mentor!%20I'm%20a%20student%20from%20SkillForge."
+                target="_blank"
+                rel="noreferrer"
+                className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-950/40 border border-white/5 hover:border-green-400/30 hover:bg-slate-950/80 transition-all group text-center"
+              >
+                <MessageSquare className="w-6 h-6 text-green-400 mb-2 group-hover:scale-110 transition-transform" />
+                <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">WhatsApp</span>
+                <span className="text-white text-xs font-semibold mt-1">Chat on WhatsApp</span>
+              </a>
             </div>
+          </div>
         </div>
       ) : (
         <div className="bg-[#1e293b]/80 border border-white/5 rounded-2xl p-12 shadow-xl text-center">
@@ -816,7 +797,15 @@ const DomainsView = () => {
     authFetch("/student/profile").then((d) => { setProfile(d?.id ? d : null); setLoading(false); }).catch(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-cyan-400 w-8 h-8" /></div>;
+  if (loading) return (
+    <div className="space-y-6">
+      <SkeletonBlock className="h-40 rounded-3xl" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <SkeletonBlock className="lg:col-span-2 h-72 rounded-2xl" />
+        <SkeletonBlock className="h-72 rounded-2xl" />
+      </div>
+    </div>
+  );
 
   // Support multiple comma-separated domains
   const rawDomains = profile?.domain_interest?.trim() || "";
@@ -863,41 +852,19 @@ const DomainsView = () => {
             const dm = DOMAIN_DATA[d] ?? DEFAULT_DOMAIN;
             const cm = colorMap[dm.color] ?? colorMap.cyan;
             return (
-              <motion.button
-                key={d}
-                onClick={() => setActiveTab(idx)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.97 }}
-                className={`px-4 py-2 rounded-full text-sm font-bold border transition-all duration-200 relative ${
+              <button key={d} onClick={() => setActiveTab(idx)}
+                className={`px-4 py-2 rounded-full text-sm font-bold border transition-all ${
                   activeTab === idx ? cm.tab : "bg-slate-800 text-slate-400 border-white/10 hover:text-white"
-                }`}
-              >
-                {activeTab === idx && (
-                  <motion.span
-                    layoutId="domainTabIndicator"
-                    className="absolute inset-0 rounded-full bg-white/5"
-                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                  />
-                )}
-                <span className="relative z-10">{d}</span>
-              </motion.button>
+                }`}>
+                {d}
+              </button>
             );
           })}
         </div>
       )}
 
-      {/* Animated domain content */}
-      <AnimatePresence mode="wait">
-
       {/* Header banner */}
-      <motion.div
-        key={`header-${activeTab}`}
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -12 }}
-        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className={`bg-gradient-to-br ${domain.gradient} border ${domain.border} rounded-3xl p-8`}
-      >
+      <div className={`bg-gradient-to-br ${domain.gradient} border ${domain.border} rounded-3xl p-8`}>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
           <div className={`w-16 h-16 rounded-2xl ${c.badge} border flex items-center justify-center flex-shrink-0 ${c.text}`}>
             {domain.icon}
@@ -922,7 +889,7 @@ const DomainsView = () => {
             </div>
           ))}
         </div>
-      </motion.div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Roadmap */}
@@ -1017,7 +984,6 @@ const DomainsView = () => {
           })}
         </div>
       </div>
-      </AnimatePresence>
     </div>
   );
 };
@@ -1038,39 +1004,16 @@ const StudentPortal = () => {
   const location = useLocation();
   const path     = location.pathname;
 
-  const getKey = () => {
-    if (path.endsWith("/profile"))     return "profile";
-    if (path.endsWith("/progress"))    return "progress";
-    if (path.endsWith("/assignments")) return "assignments";
-    if (path.endsWith("/domains"))     return "domains";
-    if (path.endsWith("/mentor"))      return "mentor";
-    return "overview";
-  };
-
   const renderContent = () => {
     if (path.endsWith("/profile"))     return <ProfileView />;
-    if (path.endsWith("/progress"))    return <FallbackView title="Progress Tracking" />;
+    if (path.endsWith("/progress"))    return <ProgressView />;
     if (path.endsWith("/assignments")) return <AssignmentsView />;
     if (path.endsWith("/domains"))     return <DomainsView />;
     if (path.endsWith("/mentor"))      return <MentorView />;
     return <OverviewView />;
   };
 
-  return (
-    <div className="w-full">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={getKey()}
-          initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          exit={{ opacity: 0, y: -14, filter: 'blur(4px)' }}
-          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {renderContent()}
-        </motion.div>
-      </AnimatePresence>
-    </div>
-  );
+  return <div className="w-full">{renderContent()}</div>;
 };
 
 export default StudentPortal;

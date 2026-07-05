@@ -2,10 +2,9 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { GraduationCap, BookOpen, User, ChevronRight, Check, Loader2 } from "lucide-react";
-import { getTokenFor, getUserFor, saveToken } from "../auth";
+import { getTokenFor, getUserFor, saveToken, getUser } from "../auth";
 
-import { API_BASE } from "../config";
-const BASE = API_BASE;
+const BASE = "http://localhost:5000/api";
 
 const BRANCHES = ["CSE", "IT", "ECE", "EEE", "MECH", "CIVIL", "AIDS", "AIML", "CSD", "Other"];
 const YEARS    = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
@@ -24,7 +23,7 @@ const Field = ({ label, children }) => (
   </div>
 );
 
-const inputCls  = "w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-cyan-500 transition-all";
+const inputCls  = "field-input px-4 py-3";
 const selectCls = inputCls;
 
 const Onboarding = () => {

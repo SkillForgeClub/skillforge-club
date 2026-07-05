@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Settings, BrainCircuit, Rocket, BookOpen, Calendar, Users, MessageSquare, LogIn, ChevronRight, CheckCircle2, ChevronDown, MonitorPlay, Code2, Sparkles, Mail, Phone, MapPin, Send, Code, Cpu, Smartphone, AlertCircle } from 'lucide-react';
-import { api } from '../api';
-import { ASSET_BASE } from '../config';
 import skillForgeLogo from '../assets/logo.png';
 import campusBg from '../assets/campus.png';
 
 const Home = React.memo(() => {
-  const navigate = useNavigate();
   const { scrollY } = useScroll();
 
   // Simplified parallax - reduced animation intensity
@@ -107,10 +104,37 @@ const Home = React.memo(() => {
   };
 
   const [homeEvents, setHomeEvents] = useState([]);
+  const [isBackendOffline, setIsBackendOffline] = useState(false);
   const [featuredProjects, setFeaturedProjects] = useState([]);
+  const [isProjectsOffline, setIsProjectsOffline] = useState(false);
   const [activeProj, setActiveProj] = useState(0);
 
-  const displayProjects = featuredProjects;
+  const FEATURED_PROJECTS = useMemo(() => [
+    {
+      id: 1,
+      title: 'AI Resume Analyzer',
+      category: 'Data & AI',
+      desc: 'An intelligent parsing engine that extracts critical information from resumes, scoring them against industry benchmarks to give students actionable feedback.',
+      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop',
+      tech: ['Python', 'FastAPI', 'NLP', 'React'],
+      link: '/projects'
+    },
+    {
+      id: 2,
+      title: 'Smart Home Hub',
+      category: 'Hardware / IoT',
+      desc: 'A centralized dashboard connecting multiple microcontrollers. Allows students to control lights, monitor temperature, and run automated routines directly from the web.',
+      image: 'https://images.unsplash.com/photo-1618761714954-0b8cd0026356?q=80&w=2070&auto=format&fit=crop',
+      tech: ['C++', 'ESP32', 'React', 'Node.js'],
+      link: '/projects'
+    }
+  ], []);
+
+  const displayProjects = useMemo(() => {
+    if (featuredProjects.length > 0) return featuredProjects;
+    if (isProjectsOffline) return FEATURED_PROJECTS;
+    return [];
+  }, [featuredProjects, isProjectsOffline, FEATURED_PROJECTS]);
 
   useEffect(() => {
     if (activeProj >= displayProjects.length && displayProjects.length > 0) {
@@ -119,28 +143,43 @@ const Home = React.memo(() => {
   }, [displayProjects, activeProj]);
 
   useEffect(() => {
-    api.getEvents()
+    fetch('http://localhost:5000/api/events')
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json();
+      })
       .then((data) => {
         if (Array.isArray(data)) {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           const upcoming = data.filter((e) => {
-            const parts = (e.date || '').split('-');
-            if (parts.length < 3) return false;
+            const parts = e.date.split('-');
             const d = new Date(parts[0], parts[1] - 1, parts[2]);
             return d >= today;
           });
           setHomeEvents((upcoming.length > 0 ? upcoming : data).slice(0, 3));
+          setIsBackendOffline(false);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setIsBackendOffline(true);
+      });
 
-    api.getProjects()
-      .then((data) => {
-        if (Array.isArray(data)) setFeaturedProjects(data);
+    fetch('http://localhost:5000/api/projects?featured=true')
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json();
       })
-      .catch(() => {});
-  }, []);
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setFeaturedProjects(data);
+          setIsProjectsOffline(false);
+        }
+      })
+      .catch(() => {
+        setIsProjectsOffline(true);
+      });
+  }, [FEATURED_PROJECTS]);
 
   return (
     <div className="min-h-screen text-white bg-[#0B1121] overflow-hidden selection:bg-cyan-500/30 selection:text-cyan-100" style={{ contain: 'layout' }}>
@@ -201,12 +240,12 @@ const Home = React.memo(() => {
         >
           {/* Logo with entrance + continuous floating animation */}
           <motion.div variants={logoVariants} className="relative mb-10 w-48 h-48">
-            {/* Subtle background glow */}
-            <div className="absolute inset-0 bg-cyan-500/10 rounded-full blur-2xl -z-10" />
-            <img
+            <motion.img
+              animate={{ y: [0, -10, 0] }}
+              transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
               src={skillForgeLogo}
               alt="SkillForge Logo"
-              className="relative z-10 w-full h-full object-contain opacity-90 drop-shadow-[0_0_15px_rgba(6,182,212,0.25)] animate-float"
+              className="relative z-10 w-full h-full object-contain opacity-90"
               loading="eager"
             />
           </motion.div>
@@ -247,7 +286,15 @@ const Home = React.memo(() => {
       {/* Content wrapper */}
       <div className="relative z-20 bg-[#0B1121]/90 border-t border-white/5 pb-32" style={{ contain: 'layout style paint' }}>
 
-
+        {/* Offline notice */}
+        {(isBackendOffline || isProjectsOffline) && (
+          <div className="max-w-4xl mx-auto mt-12 px-6 py-4 rounded-3xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-sm flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(245,158,11,0.05)] relative z-30">
+            <AlertCircle className="w-5 h-5 flex-shrink-0 animate-pulse text-amber-400" />
+            <span>
+              <strong>Demo Mode:</strong> The frontend cannot connect to the backend server (at <code className="bg-slate-950 px-1.5 py-0.5 rounded font-mono text-xs text-white">http://localhost:5000</code>). Some sections are showing mock data.
+            </span>
+          </div>
+        )}
 
         {/* ABOUT SECTION: Purpose, Vision, Mission */}
         <section id="about" className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-white/5 scroll-mt-20">
@@ -271,9 +318,8 @@ const Home = React.memo(() => {
                 <motion.div
                   key={idx}
                   variants={fadeInUpVariants}
-                  whileHover={{ y: -10, scale: 1.03, borderColor: "rgba(6, 182, 212, 0.5)", backgroundColor: "rgba(15, 23, 42, 0.7)", boxShadow: "0 15px 40px rgba(6, 182, 212, 0.2)" }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="bg-slate-950/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 transition-colors duration-300 text-left group box-border cursor-default shadow-xl shadow-black/25"
+                  whileHover={{ y: -8, borderColor: "rgba(6, 182, 212, 0.5)", backgroundColor: "rgba(15, 23, 42, 0.7)", boxShadow: "0 0 30px rgba(6, 182, 212, 0.15)" }}
+                  className="bg-slate-950/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 transition-all duration-300 text-left group box-border cursor-default shadow-xl shadow-black/25"
                 >
                   <div className="mb-6 w-12 h-12 flex items-center justify-center bg-cyan-500/10 rounded-2xl border border-cyan-500/20 group-hover:scale-110 transition-transform duration-300">
                     <img src={skillForgeLogo} alt="SkillForge Club Logo" className="w-8 h-8 object-contain opacity-90" />
@@ -287,9 +333,8 @@ const Home = React.memo(() => {
             {/* Q&A Card */}
             <motion.div
               variants={fadeInUpVariants}
-              whileHover={{ scale: 1.01, borderColor: "rgba(6, 182, 212, 0.4)", boxShadow: "0 10px 40px rgba(6, 182, 212, 0.2)" }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="bg-gradient-to-br from-cyan-950/20 via-slate-950/50 to-blue-950/20 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 text-left relative overflow-hidden group transition-colors duration-300 box-border shadow-2xl shadow-black/30"
+              whileHover={{ borderColor: "rgba(6, 182, 212, 0.4)", boxShadow: "0 0 40px rgba(6, 182, 212, 0.15)" }}
+              className="bg-gradient-to-br from-cyan-950/20 via-slate-950/50 to-blue-950/20 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 text-left relative overflow-hidden group transition-all duration-300 box-border shadow-2xl shadow-black/30"
             >
               <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-[60px] -mr-32 -mt-32" style={{ willChange: 'none' }} />
               <h3 className="text-3xl md:text-4xl font-bold text-white mb-6 relative z-10">What is SkillForge?</h3>
@@ -392,13 +437,13 @@ const Home = React.memo(() => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -15 }}
                       transition={{ duration: 0.35, ease: "easeOut" }}
-                      className="glass-card rounded-[2.5rem] overflow-hidden shadow-2xl p-6 md:p-8 flex flex-col md:flex-row gap-8 h-full"
+                      className="bg-slate-950/45 backdrop-blur-xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl p-6 md:p-8 flex flex-col md:flex-row gap-8 h-full"
                     >
                       {/* Left Column (Image) */}
                       <div className="w-full md:w-1/2 relative aspect-video md:aspect-square lg:aspect-video rounded-3xl overflow-hidden border border-white/5 shrink-0 group/img">
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/10 to-transparent opacity-60 z-10" />
                         <img
-                          src={displayProjects[activeProj].image ? (displayProjects[activeProj].image.startsWith('/uploads/') ? `${ASSET_BASE}${displayProjects[activeProj].image}` : displayProjects[activeProj].image) : ''}
+                          src={displayProjects[activeProj].image ? (displayProjects[activeProj].image.startsWith('/uploads/') ? `http://localhost:5000${displayProjects[activeProj].image}` : displayProjects[activeProj].image) : ''}
                           alt={displayProjects[activeProj].title}
                           className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-500"
                         />
@@ -524,18 +569,17 @@ const Home = React.memo(() => {
                   <motion.div
                     key={idx}
                     variants={fadeInUpVariants}
-                    whileHover={{ y: -10, scale: 1.02 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    className="flex gap-4 md:flex-col items-start md:items-center text-left md:text-center group cursor-default"
+                    whileHover={{ y: -8 }}
+                    className="flex gap-4 md:flex-col items-start md:items-center text-left md:text-center group"
                   >
                     {/* Node connector dot / icon container */}
-                    <div className="w-14 h-14 rounded-2xl bg-slate-950 border border-white/10 flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 group-hover:border-cyan-500/40 transition-colors duration-300 relative z-20">
+                    <div className="w-14 h-14 rounded-2xl bg-slate-950 border border-white/10 flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 group-hover:border-cyan-500/40 transition-all duration-300 relative z-20">
                       {domain.icon}
                     </div>
 
                     {/* Node details card */}
                     <div 
-                      className="bg-slate-950/45 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 group-hover:border-cyan-500/30 group-hover:shadow-[0_10px_30px_rgba(6,182,212,0.15)] transition-all duration-300 flex flex-col justify-between flex-grow h-full border-t border-t-white/15"
+                      className="bg-slate-950/45 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 transition-all duration-300 shadow-xl shadow-black/25 flex flex-col justify-between flex-grow h-full border-t border-t-white/15"
                     >
                       <div>
                         <h3 className="text-xl font-bold text-white mb-3 group-hover:text-cyan-400 transition-colors duration-200">{domain.title}</h3>
@@ -600,16 +644,38 @@ const Home = React.memo(() => {
                     <motion.div
                       key={i}
                       variants={fadeInUpVariants}
-                      whileHover={{ y: -6, scale: 1.02, borderColor: "rgba(59, 130, 246, 0.5)", backgroundColor: "rgba(30, 41, 59, 0.8)", boxShadow: "0 10px 25px rgba(59, 130, 246, 0.2)" }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 transition-colors duration-300 cursor-pointer"
-                      onClick={() => navigate('/events')}
+                      whileHover={{ y: -4, borderColor: "rgba(59, 130, 246, 0.5)", backgroundColor: "rgba(30, 41, 59, 0.8)", boxShadow: "0 4px 20px rgba(59, 130, 246, 0.15)" }}
+                      className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 transition-all duration-200 cursor-pointer"
+                      onClick={() => window.location.href = '/events'}
                     >
                       <div className="flex items-start justify-between">
                         <div>
                           <p className="text-blue-400 font-semibold text-sm">{event.date || new Date(event.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}</p>
                           <h4 className="text-lg font-bold text-white mt-2">{event.title}</h4>
                           <p className="text-slate-400 text-sm mt-1">{event.venue || event.category || ''}</p>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-slate-600 flex-shrink-0" />
+                      </div>
+                    </motion.div>
+                  ))
+                ) : isBackendOffline ? (
+                  [
+                    { date: "25 Mar", title: "Web Dev Bootcamp", venue: "CS Lab 301" },
+                    { date: "1 Apr", title: "AI Workshop Series", venue: "Seminar Hall" },
+                    { date: "15 Apr", title: "Hackathon Finals", venue: "Main Auditorium" },
+                  ].map((event, i) => (
+                    <motion.div
+                      key={i}
+                      variants={fadeInUpVariants}
+                      whileHover={{ y: -4, borderColor: "rgba(59, 130, 246, 0.5)", backgroundColor: "rgba(30, 41, 59, 0.8)", boxShadow: "0 4px 20px rgba(59, 130, 246, 0.15)" }}
+                      className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 transition-all duration-200 cursor-pointer"
+                      onClick={() => window.location.href = '/events'}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-blue-400 font-semibold text-sm">{event.date}</p>
+                          <h4 className="text-lg font-bold text-white mt-2">{event.title}</h4>
+                          <p className="text-slate-400 text-sm mt-1">{event.venue}</p>
                         </div>
                         <ChevronRight className="w-5 h-5 text-slate-600 flex-shrink-0" />
                       </div>
@@ -639,19 +705,18 @@ const Home = React.memo(() => {
               >
                 <div className="absolute inset-0 bg-gradient-to-b from-purple-500/5 to-transparent rounded-3xl -z-10" />
                 {[
-                  { title: "Managing Team",    detail: "Operations & Strategy",      category: "Managing Team" },
-                  { title: "Technical Team",    detail: "Devs & Engineers",           category: "Technical Team" },
-                  { title: "Designing Team",    detail: "UI/UX & Graphics",           category: "Designing Team" },
-                  { title: "Social Media Team", detail: "Marketing & Growth",         category: "Social Media" },
-                  { title: "Shooting & Editing Team", detail: "Media & Video Production", category: "Shooting & Editing Team" },
+                  { title: "Managing Team", detail: "Operations & Strategy" },
+                  { title: "Technical Team", detail: "Devs & Engineers" },
+                  { title: "Designing Team", detail: "UI/UX & Graphics" },
+                  { title: "Social Media Team", detail: "Marketing & Growth" },
+                  { title: "Shooting & Editing Team", detail: "Media & Video Production" },
                 ].map((team, i) => (
                   <motion.div
                     key={i}
                     variants={fadeInUpVariants}
-                    whileHover={{ y: -6, scale: 1.02, borderColor: "rgba(168, 85, 247, 0.5)", backgroundColor: "rgba(30, 41, 59, 0.8)", boxShadow: "0 10px 25px rgba(168, 85, 247, 0.2)" }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 flex items-center justify-between group transition-colors duration-300 cursor-pointer"
-                    onClick={() => navigate(`/team?category=${encodeURIComponent(team.category)}`)}
+                    whileHover={{ y: -4, borderColor: "rgba(168, 85, 247, 0.5)", backgroundColor: "rgba(30, 41, 59, 0.8)", boxShadow: "0 4px 20px rgba(168, 85, 247, 0.15)" }}
+                    className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 flex items-center justify-between group transition-all duration-200 cursor-pointer"
+                    onClick={() => window.location.href = '/team'}
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center font-bold text-xl text-white group-hover:bg-purple-500 transition-colors duration-200">
@@ -697,37 +762,21 @@ const Home = React.memo(() => {
               className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 max-w-3xl mx-auto"
             >
               {[
-                { 
-                  title: 'Email Us', 
-                  info: 'skillforge123@gmail.com', 
-                  icon: <Mail className="w-8 h-8 text-cyan-400" />,
-                  href: 'https://mail.google.com/mail/?view=cm&fs=1&to=skillforge123@gmail.com',
-                  target: '_blank'
-                },
-                { 
-                  title: 'Visit Us', 
-                  info: "Vignan's Institute of Information Technology, Visakhapatnam", 
-                  icon: <MapPin className="w-8 h-8 text-blue-400" />,
-                  href: 'https://maps.app.goo.gl/E2XekPJjFzf5946c8',
-                  target: '_blank'
-                }
+                { title: 'Email Us', info: 'skillforgeclub123@gmail.com', icon: <Mail className="w-8 h-8 text-cyan-400" /> },
+                { title: 'Visit Us', info: "Vignan's Institute of Information Technology, Visakhapatnam", icon: <MapPin className="w-8 h-8 text-blue-400" /> }
               ].map((contact, idx) => (
-                <motion.a
+                <motion.div
                   key={idx}
-                  href={contact.href}
-                  target={contact.target}
-                  rel={contact.target === '_blank' ? 'noopener noreferrer' : undefined}
                   variants={fadeInUpVariants}
-                  whileHover={{ y: -10, scale: 1.03, borderColor: "rgba(6, 182, 212, 0.5)", backgroundColor: "rgba(15, 23, 42, 0.7)", boxShadow: "0 15px 40px rgba(6, 182, 212, 0.2)" }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="bg-slate-950/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col items-center text-center transition-colors duration-300 group cursor-pointer shadow-xl shadow-black/20"
+                  whileHover={{ y: -8, borderColor: "rgba(6, 182, 212, 0.5)", backgroundColor: "rgba(15, 23, 42, 0.7)", boxShadow: "0 0 30px rgba(6, 182, 212, 0.15)" }}
+                  className="bg-slate-950/40 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col items-center text-center transition-all duration-300 group cursor-default shadow-xl shadow-black/20"
                 >
                   <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-6 group-hover:scale-105 transition-transform duration-200 border border-white/5">
                     {contact.icon}
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">{contact.title}</h3>
-                  <p className="text-cyan-100/70 font-medium group-hover:text-cyan-300 transition-colors">{contact.info}</p>
-                </motion.a>
+                  <p className="text-cyan-100/70 font-medium">{contact.info}</p>
+                </motion.div>
               ))}
             </motion.div>
             

@@ -1,5 +1,4 @@
-import { API_BASE } from './config';
-const BASE_URL = API_BASE;
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
 export const authApi = {
   sendOtp: async (email) => {
@@ -32,7 +31,13 @@ export const authApi = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password }),
     });
-    return res.json();
+    const data = await res.json();
+    // Surface duplicate-account responses consistently regardless of exact
+    // wording the backend used, so the UI always shows the expected message.
+    if (res.status === 409 && !data.error) {
+      data.error = "Account already exists. Please login.";
+    }
+    return data;
   },
 };
 

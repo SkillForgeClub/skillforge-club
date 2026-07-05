@@ -12,7 +12,7 @@ export default {
         secondary: "#8b5cf6"
       },
       fontFamily: {
-        sans: ['Figtree', 'Inter', 'Poppins', 'sans-serif'],
+        sans: ['Inter', 'Poppins', 'sans-serif'],
       },
       animation: {
         'fade-in': 'fadeIn 1s ease-out forwards',

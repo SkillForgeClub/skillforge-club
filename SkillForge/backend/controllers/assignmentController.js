@@ -28,9 +28,15 @@ export const assignStudentToMentor = async (req, res, next) => {
     if (!student) return res.status(404).json({ error: "Student not found." });
     if (!mentor)  return res.status(404).json({ error: "Mentor not found." });
 
-    // We no longer attempt to force-sync the users table here.
-    // If a user is not in the users table, it's a data integrity issue that should be fixed via DB migration/sync scripts,
-    // not silently patched during mentor assignment (which leads to unique constraint crashes).
+    // Ensure both exist in users table (FK requirement)
+    await supabase.from("users").upsert(
+      { id: student.id, name: student.name, email: student.email, password: "", role: "student" },
+      { onConflict: "id" }
+    );
+    await supabase.from("users").upsert(
+      { id: mentor.id, name: mentor.name, email: mentor.email, password: mentor.password || "", role: "mentor" },
+      { onConflict: "id" }
+    );
 
     await supabase.from("mentor_assignments").delete().eq("student_id", studentId);
 

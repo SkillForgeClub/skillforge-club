@@ -77,20 +77,15 @@ const Contact = () => {
               </div>
             </div>
             
-            <a 
-              href="https://mail.google.com/mail/?view=cm&fs=1&to=skillforge123@gmail.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="bg-slate-950/40 backdrop-blur-xl border border-white/10 p-8 rounded-2xl flex items-start gap-4 shadow-xl hover:border-cyan-500/30 transition-all duration-300 group block"
-            >
-              <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center shrink-0 border border-purple-500/30 group-hover:scale-105 transition-transform duration-300">
+            <div className="bg-slate-950/40 backdrop-blur-xl border border-white/10 p-8 rounded-2xl flex items-start gap-4 shadow-xl">
+              <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center shrink-0 border border-purple-500/30">
                 <Mail className="text-purple-400" />
               </div>
               <div>
                 <h3 className="text-xl font-bold text-white mb-2">Email</h3>
-                <p className="text-gray-400 group-hover:text-cyan-400 transition-colors">skillforge123@gmail.com</p>
+                <p className="text-gray-400">skillforgeclub123@gmail.com</p>
               </div>
-            </a>
+            </div>
 
             {/* Social Accounts Card */}
             <div className="bg-slate-950/40 backdrop-blur-xl border border-white/10 p-8 rounded-2xl flex items-start gap-4 shadow-xl">
@@ -135,7 +130,7 @@ const Contact = () => {
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="field-input px-4 py-3"
                   placeholder="Your Name"
                   required
                 />
@@ -146,7 +141,7 @@ const Contact = () => {
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="field-input px-4 py-3"
                   placeholder="your@email.com"
                   required
                 />
@@ -157,7 +152,7 @@ const Contact = () => {
                   type="text"
                   value={form.subject}
                   onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="field-input px-4 py-3"
                   placeholder="Subject"
                   required
                 />
@@ -167,7 +162,7 @@ const Contact = () => {
                 <textarea
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 h-32 resize-none"
+                  className="field-input px-4 py-3 h-32 resize-none"
                   placeholder="Your message..."
                   required
                 ></textarea>
