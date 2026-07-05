@@ -31,7 +31,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const SELF_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+const SELF_URL = process.env.RENDER_EXTERNAL_URL || "https://skillforge-backend-o793.onrender.com";
 
 // ─── Swagger Documentation ────────────────────────────────────────────────────
 const swaggerOptions = {
@@ -194,9 +194,9 @@ app.listen(PORT, () => {
 
   // ─── Keep-Alive Ping (prevents Render free tier spin-down) ────────────────
   // Render spins down free services after 15 minutes of inactivity.
-  // We self-ping every 14 minutes to keep the server warm.
+  // We self-ping every 5 minutes to keep the server warm.
   if (process.env.NODE_ENV !== "development") {
-    const PING_INTERVAL = 14 * 60 * 1000; // 14 minutes
+    const PING_INTERVAL = 5 * 60 * 1000; // 5 minutes
     setInterval(async () => {
       try {
         const pingUrl = `${SELF_URL}/api/health`;
