@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar, MapPin, Clock, Loader2, ExternalLink, AlertCircle, Zap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, MapPin, Clock, Loader2, ExternalLink, Zap, CalendarX } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { api } from '../api';
 
@@ -95,32 +95,35 @@ const EventCard = ({ event, isPast }) => {
 const Events = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isOffline, setIsOffline] = useState(false);
-
-  const MOCK_EVENTS = useMemo(() => [
-    { id: 1, title: "Web Dev Bootcamp", description: "Learn HTML, CSS, JS from scratch in one day with our hands-on experts.", date: "2026-08-10", time: "10:00 AM", venue: "CS Lab 301", category: "Web Development", capacity: 100, registered: 45, registration_link: "https://forms.gle/mock" },
-    { id: 2, title: "AI & ML Workshop", description: "Hands-on session on neural networks, LLMs, and Python libraries.", date: "2026-08-20", time: "2:00 PM", venue: "Seminar Hall", category: "AI/ML", capacity: 80, registered: 60, registration_link: "https://forms.gle/mock" },
-    { id: 3, title: "Hackathon 2026", description: "24-hour coding competition. Build innovative projects and win prizes!", date: "2026-09-05", time: "9:00 AM", venue: "Main Auditorium", category: "Hackathon", capacity: 200, registered: 120, registration_link: "https://forms.gle/mock" },
-  ], []);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const load = async () => {
       try {
         const data = await api.getEvents();
-        if (Array.isArray(data)) { setEvents(data); setIsOffline(false); }
-        else { setEvents(MOCK_EVENTS); setIsOffline(true); }
-      } catch { setEvents(MOCK_EVENTS); setIsOffline(true); }
-      finally { setLoading(false); }
+        if (Array.isArray(data)) {
+          setEvents(data);
+        } else {
+          setEvents([]);
+          setError('Could not load events.');
+        }
+      } catch (err) {
+        console.error("Error loading events:", err);
+        setEvents([]);
+        setError('Could not connect to server. Make sure the backend is running.');
+      } finally {
+        setLoading(false);
+      }
     };
     load();
-  }, [MOCK_EVENTS]);
+  }, []);
 
   const today = new Date();
   const upcoming = events.filter((e) => new Date(e.date) >= today);
   const past     = events.filter((e) => new Date(e.date) < today);
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-[#0B1121]">
       <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
         <Loader2 className="text-blue-400" size={40} />
       </motion.div>
@@ -145,6 +148,11 @@ const Events = () => {
           <motion.div variants={fadeUp} className="w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-500 mx-auto rounded-full mt-8" />
         </motion.div>
 
+        {error && (
+          <div className="mb-8 text-center bg-red-500/10 border border-red-500/20 rounded-2xl px-6 py-4 text-red-400">
+            {error}
+          </div>
+        )}
 
         <div className="mb-20">
           <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="flex items-center gap-3 mb-8">
@@ -153,7 +161,13 @@ const Events = () => {
             <span className="bg-blue-500/15 text-blue-300 text-xs font-bold px-3 py-1 rounded-full border border-blue-500/20">{upcoming.length}</span>
           </motion.div>
           {upcoming.length === 0 ? (
-            <p className="text-slate-500 ml-5">No upcoming events right now. Check back soon!</p>
+            <div className="text-center py-16">
+              <div className="w-20 h-20 rounded-2xl bg-slate-800/80 border border-white/10 flex items-center justify-center mx-auto mb-6">
+                <CalendarX className="w-10 h-10 text-slate-500" />
+              </div>
+              <p className="text-slate-400 font-bold text-lg mb-2">No upcoming events right now</p>
+              <p className="text-slate-500 text-sm">Check back soon — new events will be posted here!</p>
+            </div>
           ) : (
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-80px" }} variants={stagger} className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {upcoming.map((event) => <EventCard key={event.id} event={event} isPast={false} />)}

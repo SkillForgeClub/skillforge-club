@@ -1,8 +1,9 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Settings, BrainCircuit, Rocket, BookOpen, Calendar, Users, MessageSquare, LogIn, ChevronRight, CheckCircle2, ChevronDown, MonitorPlay, Code2, Sparkles, Mail, Phone, MapPin, Send, Code, Cpu, Smartphone, AlertCircle } from 'lucide-react';
 import { api } from '../api';
+import { ASSET_BASE } from '../config';
 import skillForgeLogo from '../assets/logo.png';
 import campusBg from '../assets/campus.png';
 
@@ -106,37 +107,10 @@ const Home = React.memo(() => {
   };
 
   const [homeEvents, setHomeEvents] = useState([]);
-  const [isBackendOffline, setIsBackendOffline] = useState(false);
   const [featuredProjects, setFeaturedProjects] = useState([]);
-  const [isProjectsOffline, setIsProjectsOffline] = useState(false);
   const [activeProj, setActiveProj] = useState(0);
 
-  const FEATURED_PROJECTS = useMemo(() => [
-    {
-      id: 1,
-      title: 'AI Resume Analyzer',
-      category: 'Data & AI',
-      desc: 'An intelligent parsing engine that extracts critical information from resumes, scoring them against industry benchmarks to give students actionable feedback.',
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop',
-      tech: ['Python', 'FastAPI', 'NLP', 'React'],
-      link: '/projects'
-    },
-    {
-      id: 2,
-      title: 'Smart Home Hub',
-      category: 'Hardware / IoT',
-      desc: 'A centralized dashboard connecting multiple microcontrollers. Allows students to control lights, monitor temperature, and run automated routines directly from the web.',
-      image: 'https://images.unsplash.com/photo-1618761714954-0b8cd0026356?q=80&w=2070&auto=format&fit=crop',
-      tech: ['C++', 'ESP32', 'React', 'Node.js'],
-      link: '/projects'
-    }
-  ], []);
-
-  const displayProjects = useMemo(() => {
-    if (featuredProjects.length > 0) return featuredProjects;
-    if (isProjectsOffline) return FEATURED_PROJECTS;
-    return [];
-  }, [featuredProjects, isProjectsOffline, FEATURED_PROJECTS]);
+  const displayProjects = featuredProjects;
 
   useEffect(() => {
     if (activeProj >= displayProjects.length && displayProjects.length > 0) {
@@ -145,7 +119,6 @@ const Home = React.memo(() => {
   }, [displayProjects, activeProj]);
 
   useEffect(() => {
-    // Use the centralized api.js which respects VITE_API_URL for production
     api.getEvents()
       .then((data) => {
         if (Array.isArray(data)) {
@@ -158,24 +131,16 @@ const Home = React.memo(() => {
             return d >= today;
           });
           setHomeEvents((upcoming.length > 0 ? upcoming : data).slice(0, 3));
-          setIsBackendOffline(false);
         }
       })
-      .catch(() => {
-        setIsBackendOffline(true);
-      });
+      .catch(() => {});
 
     api.getProjects()
       .then((data) => {
-        if (Array.isArray(data)) {
-          setFeaturedProjects(data);
-          setIsProjectsOffline(false);
-        }
+        if (Array.isArray(data)) setFeaturedProjects(data);
       })
-      .catch(() => {
-        setIsProjectsOffline(true);
-      });
-  }, [FEATURED_PROJECTS]);
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen text-white bg-[#0B1121] overflow-hidden selection:bg-cyan-500/30 selection:text-cyan-100" style={{ contain: 'layout' }}>
@@ -433,7 +398,7 @@ const Home = React.memo(() => {
                       <div className="w-full md:w-1/2 relative aspect-video md:aspect-square lg:aspect-video rounded-3xl overflow-hidden border border-white/5 shrink-0 group/img">
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/10 to-transparent opacity-60 z-10" />
                         <img
-                          src={displayProjects[activeProj].image ? (displayProjects[activeProj].image.startsWith('/uploads/') ? `http://localhost:5000${displayProjects[activeProj].image}` : displayProjects[activeProj].image) : ''}
+                          src={displayProjects[activeProj].image ? (displayProjects[activeProj].image.startsWith('/uploads/') ? `${ASSET_BASE}${displayProjects[activeProj].image}` : displayProjects[activeProj].image) : ''}
                           alt={displayProjects[activeProj].title}
                           className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-500"
                         />
@@ -645,30 +610,6 @@ const Home = React.memo(() => {
                           <p className="text-blue-400 font-semibold text-sm">{event.date || new Date(event.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}</p>
                           <h4 className="text-lg font-bold text-white mt-2">{event.title}</h4>
                           <p className="text-slate-400 text-sm mt-1">{event.venue || event.category || ''}</p>
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-slate-600 flex-shrink-0" />
-                      </div>
-                    </motion.div>
-                  ))
-                ) : isBackendOffline ? (
-                  [
-                    { date: "25 Mar", title: "Web Dev Bootcamp", venue: "CS Lab 301" },
-                    { date: "1 Apr", title: "AI Workshop Series", venue: "Seminar Hall" },
-                    { date: "15 Apr", title: "Hackathon Finals", venue: "Main Auditorium" },
-                  ].map((event, i) => (
-                    <motion.div
-                      key={i}
-                      variants={fadeInUpVariants}
-                      whileHover={{ y: -6, scale: 1.02, borderColor: "rgba(59, 130, 246, 0.5)", backgroundColor: "rgba(30, 41, 59, 0.8)", boxShadow: "0 10px 25px rgba(59, 130, 246, 0.2)" }}
-                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      className="p-6 rounded-3xl bg-slate-900/80 border border-white/10 transition-colors duration-300 cursor-pointer"
-                      onClick={() => navigate('/events')}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-blue-400 font-semibold text-sm">{event.date}</p>
-                          <h4 className="text-lg font-bold text-white mt-2">{event.title}</h4>
-                          <p className="text-slate-400 text-sm mt-1">{event.venue}</p>
                         </div>
                         <ChevronRight className="w-5 h-5 text-slate-600 flex-shrink-0" />
                       </div>

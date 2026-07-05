@@ -12,9 +12,11 @@ const CATEGORY_COLORS = {
   'Mobile':          'bg-amber-500/20 text-amber-300 border-amber-500/30',
 };
 
+import { ASSET_BASE } from '../config';
+
 const ProjectCard = React.memo(({ title, description, category, image, githubLink, demoLink, tags }) => {
   const displayImage = image && image.startsWith('/uploads/')
-    ? `http://localhost:5000${image}`
+    ? `${ASSET_BASE}${image}`
     : image;
 
   return (

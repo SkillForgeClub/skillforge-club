@@ -8,7 +8,8 @@ import {
 } from "lucide-react";
 import { getTokenFor } from "../auth";
 
-const BASE = "http://localhost:5000/api";
+import { API_BASE } from "../config";
+const BASE = API_BASE;
 
 const authFetch = async (path, opts = {}) => {
   const res = await fetch(`${BASE}${path}`, {

@@ -8,7 +8,8 @@ import { getTokenFor, getUser, logout } from "../auth";
 const fadeUp = { initial: { opacity: 0, y: 22 }, animate: { opacity: 1, y: 0, transition: { duration: 0.38, ease: [0.16, 1, 0.3, 1] } }, exit: { opacity: 0, y: -14, transition: { duration: 0.2, ease: 'easeIn' } } };
 const sectionAnim = { initial: { opacity: 0, x: 18 }, animate: { opacity: 1, x: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }, exit: { opacity: 0, x: -18, transition: { duration: 0.18, ease: 'easeIn' } } };
 
-const BASE = "http://localhost:5000/api";
+import { API_BASE } from "../config";
+const BASE = API_BASE;
 const authFetch = async (path) => {
   const res = await fetch(`${BASE}${path}`, {
     headers: { Authorization: `Bearer ${getTokenFor("student")}` },
