@@ -107,26 +107,31 @@ export const updateProfile = async (req, res, next) => {
   try {
     const { name, domain_interest } = req.body;
     const updates = {};
-    if (name) updates.name = name;
+    if (name && name.trim()) updates.name = name.trim();
     if (domain_interest !== undefined) updates.domain_interest = domain_interest;
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: "No valid fields to update." });
+    }
 
     const { data: updatedStudent, error: err1 } = await supabase
       .from("students")
       .update(updates)
       .eq("id", req.user.id)
-      .select("*")
+      .select("id, name, email, domain_interest, created_at")
       .single();
 
     if (err1) throw err1;
 
-    if (name) {
+    // Mirror name change to users table for consistency
+    if (updates.name) {
       await supabase
         .from("users")
-        .update({ name })
+        .update({ name: updates.name })
         .eq("id", req.user.id);
     }
 
-    res.json({ message: "Profile updated successfully", student: updatedStudent });
+    res.json({ message: "Profile updated successfully", student: { ...updatedStudent, role: "student" } });
   } catch (err) {
     next(err);
   }

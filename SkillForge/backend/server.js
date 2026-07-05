@@ -31,6 +31,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const SELF_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
 
 // ─── Swagger Documentation ────────────────────────────────────────────────────
 const swaggerOptions = {
@@ -70,7 +71,18 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // ─── Security & Middleware ────────────────────────────────────────────────────
 app.use(helmet());
 app.use(cors({
-  origin: true,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    // Allow all localhost variants for development
+    if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return callback(null, true);
+    // Allow all Vercel deployments
+    if (/\.vercel\.app$/.test(origin)) return callback(null, true);
+    // Allow custom domains set via env
+    const allowed = (process.env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
+    if (allowed.includes(origin)) return callback(null, true);
+    return callback(null, true); // permissive fallback — restrict if needed
+  },
   credentials: true,
 }));
 app.use(morgan("dev"));
@@ -179,6 +191,23 @@ app.listen(PORT, () => {
   console.log(`\n🚀 SkillForge API running on http://localhost:${PORT}`);
   console.log(`📚 API Docs: http://localhost:${PORT}/api-docs`);
   console.log(`📦 Environment: ${process.env.NODE_ENV || "development"}\n`);
+
+  // ─── Keep-Alive Ping (prevents Render free tier spin-down) ────────────────
+  // Render spins down free services after 15 minutes of inactivity.
+  // We self-ping every 14 minutes to keep the server warm.
+  if (process.env.NODE_ENV !== "development") {
+    const PING_INTERVAL = 14 * 60 * 1000; // 14 minutes
+    setInterval(async () => {
+      try {
+        const pingUrl = `${SELF_URL}/api/health`;
+        const res = await fetch(pingUrl);
+        console.log(`[Keep-Alive] Pinged ${pingUrl} → ${res.status}`);
+      } catch (err) {
+        console.warn(`[Keep-Alive] Ping failed:`, err.message);
+      }
+    }, PING_INTERVAL);
+    console.log(`💓 Keep-alive ping enabled every 14 minutes → ${SELF_URL}/api/health`);
+  }
 });
 
 export default app;

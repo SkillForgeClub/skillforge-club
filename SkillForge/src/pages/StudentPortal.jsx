@@ -275,14 +275,15 @@ const ProfileView = () => {
           Authorization: `Bearer ${getTokenFor("student")}`
         },
         body: JSON.stringify({
-          name: editForm.name,
+          name: editForm.name.trim(),
           domain_interest: editForm.domains.join(", ")
         })
       });
-      if (!res.ok) throw new Error();
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Update failed");
       
-      const updated = await authFetch("/student/profile");
-      setProfile(updated);
+      // Use the returned student data directly — no extra fetch needed
+      setProfile(json.student ?? { ...profile, name: editForm.name.trim(), domain_interest: editForm.domains.join(", ") });
       setSaveStatus("success");
       setIsEditing(false);
     } catch {
@@ -599,43 +600,33 @@ const MentorView = () => {
               </div>
             ))}
           </div>
-          <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-6 space-y-4">
-            <p className="text-slate-400 text-sm leading-relaxed">Your mentor is here to guide your learning journey. Reach out for feedback or to schedule a session using the channels below:</p>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              {/* Email Button */}
-              <a
-                href={`mailto:${mentor.email}`}
-                className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-950/40 border border-white/5 hover:border-cyan-500/30 hover:bg-slate-950/80 transition-all group text-center"
-              >
-                <Mail className="w-6 h-6 text-cyan-400 mb-2 group-hover:scale-110 transition-transform" />
-                <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Email</span>
-                <span className="text-white text-xs font-semibold mt-1 truncate max-w-full">{mentor.email}</span>
-              </a>
+            <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-6 space-y-4">
+              <p className="text-slate-400 text-sm leading-relaxed">Your mentor is here to guide your learning journey. Reach out for feedback or to schedule a session:</p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                {/* Email Button */}
+                <a
+                  href={`mailto:${mentor.email}`}
+                  className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-950/40 border border-white/5 hover:border-cyan-500/30 hover:bg-slate-950/80 transition-all group text-center"
+                >
+                  <Mail className="w-6 h-6 text-cyan-400 mb-2 group-hover:scale-110 transition-transform" />
+                  <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Email</span>
+                  <span className="text-white text-xs font-semibold mt-1 truncate max-w-full">{mentor.email}</span>
+                </a>
 
-              {/* Phone Button */}
-              <a
-                href="tel:+919876543210"
-                className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-950/40 border border-white/5 hover:border-emerald-500/30 hover:bg-slate-950/80 transition-all group text-center"
-              >
-                <Phone className="w-6 h-6 text-emerald-400 mb-2 group-hover:scale-110 transition-transform" />
-                <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Phone</span>
-                <span className="text-white text-xs font-semibold mt-1">+91 98765 43210</span>
-              </a>
-
-              {/* WhatsApp Button */}
-              <a
-                href="https://wa.me/919876543210?text=Hi%20Mentor!%20I'm%20a%20student%20from%20SkillForge."
-                target="_blank"
-                rel="noreferrer"
-                className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-950/40 border border-white/5 hover:border-green-400/30 hover:bg-slate-950/80 transition-all group text-center"
-              >
-                <MessageSquare className="w-6 h-6 text-green-400 mb-2 group-hover:scale-110 transition-transform" />
-                <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">WhatsApp</span>
-                <span className="text-white text-xs font-semibold mt-1">Chat on WhatsApp</span>
-              </a>
+                {/* WhatsApp Button */}
+                <a
+                  href={`https://wa.me/?text=Hi%20${encodeURIComponent(mentor.name)}!%20I'm%20a%20student%20from%20SkillForge.`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-950/40 border border-white/5 hover:border-green-400/30 hover:bg-slate-950/80 transition-all group text-center"
+                >
+                  <MessageSquare className="w-6 h-6 text-green-400 mb-2 group-hover:scale-110 transition-transform" />
+                  <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">WhatsApp</span>
+                  <span className="text-white text-xs font-semibold mt-1">Chat on WhatsApp</span>
+                </a>
+              </div>
             </div>
-          </div>
         </div>
       ) : (
         <div className="bg-[#1e293b]/80 border border-white/5 rounded-2xl p-12 shadow-xl text-center">
