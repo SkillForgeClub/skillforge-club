@@ -34,8 +34,20 @@ const Navbar = React.memo(() => {
     }
   }, [location.hash]);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   return (
-    <nav className="fixed w-full z-50 bg-slate-950/75 backdrop-blur-md border-b border-white/5 top-0" style={{ contain: 'layout style paint' }}>
+    <nav className="fixed w-full z-50 bg-slate-950/75 backdrop-blur-md border-b border-white/5 top-0" style={{ contain: 'layout style' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ willChange: 'transform' }}>
         <div className="flex items-center justify-between h-20">
           
@@ -96,7 +108,7 @@ const Navbar = React.memo(() => {
 
           {/* Mobile Layout */}
           <div className="md:hidden flex items-center justify-between w-full">
-            <Link to="/" className="flex items-center">
+            <Link to="/" onClick={closeMenu} className="flex items-center">
               <img src={logoImage} alt="SkillForge Logo" className="h-10 w-auto object-contain drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]" />
             </Link>
             <button
@@ -109,44 +121,58 @@ const Navbar = React.memo(() => {
         </div>
       </div>
 
+      {/* Mobile Animated Dropdown and Backdrop */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div 
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="md:hidden absolute top-20 left-0 w-full bg-slate-950/95 backdrop-blur-xl border-b border-white/5 overflow-hidden"
-          >
-            <div className="px-4 pt-2 pb-6 space-y-2">
-              {navLinks.map((link) => {
-                const isActive = location.pathname === link.path || (location.pathname === '/' && location.hash === link.path.replace('/', ''));
-                return (
+          <>
+            {/* Backdrop Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={closeMenu}
+              className="fixed inset-0 top-20 z-40 bg-slate-950/60 backdrop-blur-sm md:hidden"
+            />
+
+            {/* Dropdown Panel */}
+            <motion.div
+              initial={{ opacity: 0, height: 0, y: -10 }}
+              animate={{ opacity: 1, height: 'auto', y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -10 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              className="md:hidden absolute top-20 left-0 w-full bg-slate-950/95 backdrop-blur-xl border-b border-white/5 z-50 overflow-hidden"
+            >
+              <div className="px-4 pt-2 pb-6 space-y-2">
+                {navLinks.map((link) => {
+                  const isActive = location.pathname === link.path || (location.pathname === '/' && location.hash === link.path.replace('/', ''));
+                  return (
+                    <Link
+                      key={link.name}
+                      to={link.path}
+                      onClick={closeMenu}
+                      className={`block px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200 ${
+                        isActive
+                          ? 'text-cyan-400 bg-cyan-500/10 border border-cyan-500/20'
+                          : 'text-gray-300 hover:text-white hover:bg-white/5 border border-transparent'
+                      }`}
+                    >
+                      {link.name}
+                    </Link>
+                  );
+                })}
+                <div className="pt-4 border-t border-white/5">
                   <Link
-                    key={link.name}
-                    to={link.path}
+                    to="/login"
                     onClick={closeMenu}
-                    className={`block px-4 py-3 rounded-xl text-lg font-medium transition-all duration-200 ${
-                      isActive
-                        ? 'text-cyan-400 bg-cyan-500/10 border border-cyan-500/20'
-                        : 'text-gray-300 hover:text-white hover:bg-white/5 border border-transparent'
-                    }`}
+                    className="block w-full py-3.5 rounded-xl text-center text-lg font-bold bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 text-slate-950 hover:opacity-90 transition-opacity duration-200"
                   >
-                    {link.name}
+                    Login
                   </Link>
-                );
-              })}
-              <div className="pt-4 border-t border-white/5">
-                <Link
-                  to="/login"
-                  onClick={closeMenu}
-                  className="block w-full py-3.5 rounded-xl text-center text-lg font-bold bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 text-slate-950 hover:opacity-90 transition-opacity duration-200"
-                >
-                  Login
-                </Link>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </nav>

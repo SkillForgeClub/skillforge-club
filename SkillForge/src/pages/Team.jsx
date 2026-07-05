@@ -23,7 +23,7 @@ import imgNavya from '../assets/profile photos (File responses)/Navya.jpg';
 import imgPHPadmavathi from '../assets/profile photos (File responses)/P.H.Padmavathi.jpeg';
 import imgPrasanthKaredla from '../assets/profile photos (File responses)/Prasanth Karedla.png';
 import imgPremanvitha from '../assets/profile photos (File responses)/Premanvitha.jpg';
-import imgPrudhvi from '../assets/profile photos (File responses)/Prudhvi_.webp';
+import imgPrudhvi from '../assets/profile photos (File responses)/prudvi.jpg.jpeg';
 import imgPurvi from '../assets/profile photos (File responses)/Purvi.jpg';
 import imgSanjana from '../assets/profile photos (File responses)/Sanjana_.jpg';
 import imgSubhikshaSavarapu from '../assets/profile photos (File responses)/Subhiksha Savarapu.jpg';
@@ -69,7 +69,7 @@ const Team = () => {
   const MOCK_TEAM = useMemo(() => [
     {
       id: 27,
-      name: "P. Chaitanya",
+      name: "Chaitanya P",
       role: "President",
       department: "President",
       avatar: imgChaitanya,
@@ -90,7 +90,7 @@ const Team = () => {
     },
     {
       id: 2,
-      name: "Jureddi Jaishnavi",
+      name: "Jaishnavi Jureddi",
       role: "Vice President",
       department: "Vice President",
       avatar: imgJureddiJaishnavi,
@@ -101,7 +101,7 @@ const Team = () => {
     },
     {
       id: 3,
-      name: "Savarapu Subhiksha",
+      name: "Subhiksha Savarapu",
       role: "Managing Lead",
       department: "Managing Team",
       avatar: imgSubhikshaSavarapu,
@@ -111,7 +111,7 @@ const Team = () => {
     },
     {
       id: 4,
-      name: "Samarla Charmi",
+      name: "Charmi Samarla",
       role: "Manager",
       department: "Managing Team",
       avatar: imgCharmi,
@@ -121,7 +121,7 @@ const Team = () => {
     },
     {
       id: 5,
-      name: "Tummalapalli Kartik",
+      name: "Kartik Tummalapalli",
       role: "Managing Team",
       department: "Managing Team",
       avatar: imgKartikTummalapalli,
@@ -132,7 +132,7 @@ const Team = () => {
     },
     {
       id: 6,
-      name: "Adari Poorvi",
+      name: "Poorvi Adari",
       role: "Managing Team",
       department: "Managing Team",
       avatar: imgPurvi,
@@ -153,7 +153,7 @@ const Team = () => {
     },
     {
       id: 8,
-      name: "Rallapalli Tharun Kumar",
+      name: "Tharun Kumar RallaPalli",
       role: "Managing Team",
       department: "Managing Team",
       avatar: imgTharunKumar,
@@ -164,7 +164,7 @@ const Team = () => {
     },
     {
       id: 9,
-      name: "A. NAVYA",
+      name: "Navya A",
       role: "Technical Lead",
       department: "Technical Team",
       avatar: imgAripakanavya,
@@ -178,7 +178,7 @@ const Team = () => {
     },
     {
       id: 10,
-      name: "Uggina Navya Sri",
+      name: "Navya Sri Uggina",
       role: "Technical Team",
       department: "Technical Team",
       avatar: imgNavya,
@@ -188,7 +188,7 @@ const Team = () => {
     },
     {
       id: 11,
-      name: "S. Vainavi",
+      name: "Vainavi S",
       role: "Technical Team",
       department: "Technical Team",
       avatar: imgVainavi,
@@ -198,7 +198,7 @@ const Team = () => {
     },
     {
       id: 12,
-      name: "V. Harshith Sai",
+      name: "Harshith Sai V",
       role: "Technical Team",
       department: "Technical Team",
       avatar: imgHarshith,
@@ -227,7 +227,7 @@ const Team = () => {
     },
     {
       id: 14,
-      name: "Kunduru Karthik",
+      name: "Karthik Kunduru",
       role: "Technical Team & Shooting Team",
       department: "Technical Team & Shooting Team",
       avatar: imgKKarthik,
@@ -241,7 +241,7 @@ const Team = () => {
     },
     {
       id: 15,
-      name: "P. Harshini Padmavathi",
+      name: "Harshini Padmavathi P",
       role: "Technical Team",
       department: "Technical Team",
       avatar: imgPHPadmavathi,
@@ -254,7 +254,7 @@ const Team = () => {
     },
     {
       id: 16,
-      name: "S. Joshika",
+      name: "Joshika S",
       role: "Technical Team",
       department: "Technical Team",
       avatar: imgJoshika,
@@ -302,7 +302,7 @@ const Team = () => {
     },
     {
       id: 28,
-      name: "Ummidi Hari Harsha",
+      name: "Hari Harsha Ummidi",
       role: "Designer Lead and Social media Advisor",
       department: "Designing Team",
       avatar: imgHarsha,
@@ -312,7 +312,7 @@ const Team = () => {
     },
     {
       id: 20,
-      name: "B. Lalasa",
+      name: "Lalasa s",
       role: "Social Media",
       department: "Social Media",
       avatar: imgLalasaSomadhula,
@@ -322,7 +322,7 @@ const Team = () => {
     },
     {
       id: 21,
-      name: "L. Kundana",
+      name: "Kundana Lam",
       role: "Social Media",
       department: "Social Media",
       avatar: imgKundanaLam,
@@ -332,7 +332,7 @@ const Team = () => {
     },
     {
       id: 22,
-      name: "B. Chandrika",
+      name: "Chandrika B",
       role: "Social Media",
       department: "Social Media",
       avatar: imgChandrikaBylapudi,
@@ -342,7 +342,7 @@ const Team = () => {
     },
     {
       id: 23,
-      name: "P. Sanjana",
+      name: "Sanjana P",
       role: "Social Media",
       department: "Social Media Team",
       avatar: imgSanjana,
@@ -355,7 +355,7 @@ const Team = () => {
     },
     {
       id: 24,
-      name: "G. Gayathri",
+      name: "Gayathri G",
       role: "Social Media",
       department: "Social Media",
       avatar: imgGayathriGuvvala,
@@ -365,7 +365,7 @@ const Team = () => {
     },
     {
       id: 25,
-      name: "D. Premanvitha",
+      name: "Premanvitha D",
       role: "Social Media",
       department: "Social Media",
       avatar: imgPremanvitha,
@@ -375,13 +375,13 @@ const Team = () => {
     },
     {
       id: 26,
-      name: "Sammidi Yaswanth",
-      role: "Shooting Lead",
-      department: "Shooting Team",
+      name: "Yaswanth Sammidi",
+      role: "Shooting & Editing Lead",
+      department: "Shooting & Editing Team",
       avatar: imgYashwant,
       linkedin: "https://www.linkedin.com/in/yaswanth-sammidi-0271a6349",
       github: "https://github.com/yaswanthsammidi-wq",
-      bio: "Shooting Lead"
+      bio: "Shooting & Editing Lead"
     }
   ], []);
 
@@ -459,37 +459,44 @@ const Team = () => {
     { id: 'Technical Team', label: 'Technical Team 💻' },
     { id: 'Designing Team', label: 'Designing Team 🎨' },
     { id: 'Social Media', label: 'Social Media 📣' },
-    { id: 'Shooting Team', label: 'Shooting Team 🎬' }
+    { id: 'Shooting & Editing Team', label: 'Shooting & Editing Team 🎬' }
   ], []);
+
+  const isLeadMember = (member) => {
+    const name = (member.name || '').toLowerCase();
+    const role = (member.role || '').toLowerCase();
+    if (name.includes('vaishnavi') && name.includes('p')) return false;
+    if (name.includes('vainavi')) return false;
+    if (name.includes('navya sri')) return false;
+    if (name.includes('kartik') && name.includes('t.')) return false;
+    return (
+      role.includes('president') ||
+      role.includes('lead') ||
+      role.includes('director') ||
+      role.includes('manager') ||
+      role.includes('mentor')
+    );
+  };
+
+  const matchesCategory = (member, category) => {
+    if (category === 'All') return true;
+    if (category === 'Leads') return isLeadMember(member);
+    if (category === 'Managing Team') {
+      const isSamarlaCharmi = (member.name || '').toLowerCase().includes('samarla') && (member.name || '').toLowerCase().includes('charmi');
+      if (isSamarlaCharmi) return false;
+    }
+    return Boolean(member.department && member.department.includes(category));
+  };
 
   // Filtering & Search logic
   const filteredTeam = useMemo(() => {
     return team.filter((member) => {
-      const isLead = (() => {
-        const name = (member.name || '').toLowerCase();
-        const role = (member.role || '').toLowerCase();
-        if (name.includes('vaishnavi') && name.includes('p')) return false;
-        if (name.includes('vainavi')) return false;
-        if (name.includes('navya sri')) return false;
-        if (name.includes('kartik') && name.includes('t.')) return false;
-        return (
-          role.includes('president') ||
-          role.includes('lead') ||
-          role.includes('director') ||
-          role.includes('manager') ||
-          role.includes('mentor')
-        );
-      })();
-
-      const matchesCategory = 
-        selectedCategory === 'All' || 
-        (selectedCategory === 'Leads' && isLead) ||
-        (selectedCategory !== 'Leads' && member.department && member.department.includes(selectedCategory));
-      const matchesSearch = 
+      const matchesCategoryFilter = matchesCategory(member, selectedCategory);
+      const matchesSearch =
         (member.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (member.role || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (member.department && member.department.toLowerCase().includes(searchQuery.toLowerCase()));
-      return matchesCategory && matchesSearch;
+      return matchesCategoryFilter && matchesSearch;
     });
   }, [team, selectedCategory, searchQuery]);
 
@@ -553,22 +560,7 @@ const Team = () => {
     const leads = [];
     const members = [];
     sortedTeam.forEach((member) => {
-      const name = member.name.toLowerCase();
-      const roleLower = member.role.toLowerCase();
-      const isLead = (() => {
-        if (name.includes('vaishnavi') && name.includes('p')) return false;
-        if (name.includes('vainavi')) return false;
-        if (name.includes('navya sri')) return false;
-        if (name.includes('kartik') && name.includes('t.')) return false;
-        return (
-          roleLower.includes('president') ||
-          roleLower.includes('lead') ||
-          roleLower.includes('director') ||
-          roleLower.includes('manager') ||
-          roleLower.includes('mentor')
-        );
-      })();
-      if (isLead) {
+      if (isLeadMember(member)) {
         leads.push(member);
       } else {
         members.push(member);

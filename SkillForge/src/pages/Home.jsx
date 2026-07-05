@@ -643,7 +643,7 @@ const Home = React.memo(() => {
                   { title: "Technical Team",    detail: "Devs & Engineers",           category: "Technical Team" },
                   { title: "Designing Team",    detail: "UI/UX & Graphics",           category: "Designing Team" },
                   { title: "Social Media Team", detail: "Marketing & Growth",         category: "Social Media" },
-                  { title: "Shooting Team",     detail: "Media & Video Production",   category: "Shooting Team" },
+                  { title: "Shooting & Editing Team", detail: "Media & Video Production", category: "Shooting & Editing Team" },
                 ].map((team, i) => (
                   <motion.div
                     key={i}
