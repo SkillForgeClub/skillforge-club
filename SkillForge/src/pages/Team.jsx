@@ -23,7 +23,7 @@ import imgNavya from '../assets/profile photos (File responses)/Navya.jpg';
 import imgPHPadmavathi from '../assets/profile photos (File responses)/P.H.Padmavathi.jpeg';
 import imgPrasanthKaredla from '../assets/profile photos (File responses)/Prasanth Karedla.png';
 import imgPremanvitha from '../assets/profile photos (File responses)/Premanvitha.jpg';
-import imgPrudhvi from '../assets/profile photos (File responses)/prudvi.jpg.jpeg';
+import imgPrudhvi from '../assets/profile photos (File responses)/Prudvi.jpg.jpeg';
 import imgPurvi from '../assets/profile photos (File responses)/Purvi.jpg';
 import imgSanjana from '../assets/profile photos (File responses)/Sanjana_.jpg';
 import imgSubhikshaSavarapu from '../assets/profile photos (File responses)/Subhiksha Savarapu.jpg';
