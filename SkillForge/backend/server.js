@@ -200,13 +200,17 @@ app.listen(PORT, () => {
     setInterval(async () => {
       try {
         const pingUrl = `${SELF_URL}/api/health`;
-        const res = await fetch(pingUrl);
-        console.log(`[Keep-Alive] Pinged ${pingUrl} → ${res.status}`);
+        const https = await import('https');
+        https.get(pingUrl, (res) => {
+          console.log(`[Keep-Alive] Pinged ${pingUrl} → ${res.statusCode}`);
+        }).on('error', (err) => {
+          console.warn(`[Keep-Alive] Ping failed:`, err.message);
+        });
       } catch (err) {
-        console.warn(`[Keep-Alive] Ping failed:`, err.message);
+        console.warn(`[Keep-Alive] Error:`, err.message);
       }
     }, PING_INTERVAL);
-    console.log(`💓 Keep-alive ping enabled every 14 minutes → ${SELF_URL}/api/health`);
+    console.log(`💓 Keep-alive ping enabled every 5 minutes → ${SELF_URL}/api/health`);
   }
 });
 
