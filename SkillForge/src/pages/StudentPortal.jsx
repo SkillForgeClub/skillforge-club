@@ -513,7 +513,8 @@ const AssignmentsView = () => {
 
       <div className="space-y-3">
         <h3 className="text-lg font-bold text-amber-400">Pending ({pending.length})</h3>
-        {pending.length === 0 && <p className="text-slate-500">All caught up! 🎉</p>}
+        {data.length === 0 && <p className="text-slate-500">No tasks are assigned yet</p>}
+        {data.length > 0 && pending.length === 0 && <p className="text-slate-500">No tasks are pending, contact your mentor for new tasks</p>}
         {pending.map((task, i) => (
           <motion.div
             key={task.id}
