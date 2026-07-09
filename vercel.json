@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "cd SkillForge && npm run build",
   "outputDirectory": "SkillForge/dist",
   "installCommand": "cd SkillForge && npm install",
   "rewrites": [
