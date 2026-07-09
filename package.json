@@ -1,0 +1,11 @@
+{
+  "name": "skillforge-club-root",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "SkillForge"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=SkillForge && node -e \"const fs = require('fs'); fs.mkdirSync('dist', { recursive: true }); fs.cpSync('SkillForge/dist', 'dist', { recursive: true });\""
+  }
+}

@@ -1,0 +1,16 @@
+skillforge-club-website-main/
+.vite/
+node_modules/
+.env
+.env.*
+*.env
+*log.txt
+*.log
+workspace_files.txt
+root_files.txt
+found_files.txt
+assets_dirs.txt
+dist/
+build/
+.gemini/
+.agents/
