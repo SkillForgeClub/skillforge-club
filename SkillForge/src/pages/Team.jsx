@@ -19,7 +19,7 @@ import imgJoshika from '../assets/profile_photos/Joshika.jpeg';
 import imgKartikTummalapalli from '../assets/profile_photos/Kartik Tummalapalli.jpg';
 import imgKundanaLam from '../assets/profile_photos/Kundana Lam.jpg';
 import imgLalasaSomadhula from '../assets/profile_photos/Lalasa Somadhula.jpg';
-import imgNavya from '../assets/profile_photos/Navya.jpg';
+import imgNavya from '../assets/profile_photos/navya.jpg';
 import imgPHPadmavathi from '../assets/profile_photos/P.H.Padmavathi.jpeg';
 import imgPrasanthKaredla from '../assets/profile_photos/Prasanth Karedla.png';
 import imgPremanvitha from '../assets/profile_photos/Premanvitha.jpg';
