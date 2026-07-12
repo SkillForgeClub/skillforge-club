@@ -3,6 +3,7 @@ import CardGrid from '../components/CardGrid';
 import DomainCard from '../components/DomainCard';
 import { Globe, Code2, Paintbrush, Database, X, ExternalLink, BookOpen, Info, Brain, Terminal, BookMarked, Zap } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import skillForgeLogo from '../assets/logo.png';
 
 const domainsList = [
   {
@@ -100,7 +101,7 @@ const Domains = () => {
         </p>
       </div>
 
-      <CardGrid columns={3}>
+      <CardGrid columns={4}>
         {domainsList.map((domain, index) => (
           <DomainCard
             key={index}
@@ -237,41 +238,28 @@ const Domains = () => {
                 DSA Interactive Roadmap
                 <Zap size={12} className="fill-current" />
               </button>
-              <a
-                href="https://roadmap.sh/computer-science"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900/60 hover:bg-slate-800/80 border border-white/10 rounded-xl text-cyan-400 hover:text-cyan-300 text-xs sm:text-sm font-bold transition-all"
-              >
-                CS Roadmap
-                <ExternalLink size={12} />
-              </a>
-              <a
-                href="https://leetcode.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900/60 hover:bg-slate-800/80 border border-white/10 rounded-xl text-cyan-400 hover:text-cyan-300 text-xs sm:text-sm font-bold transition-all"
-              >
-                LeetCode
-                <ExternalLink size={12} />
-              </a>
-              <a
-                href="https://www.geeksforgeeks.org/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900/60 hover:bg-slate-800/80 border border-white/10 rounded-xl text-cyan-400 hover:text-cyan-300 text-xs sm:text-sm font-bold transition-all"
-              >
-                GeeksforGeeks
-                <ExternalLink size={12} />
-              </a>
+              {dsaResources.map((res, idx) => (
+                <a
+                  key={idx}
+                  href={res.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900/60 hover:bg-slate-800/80 border border-white/10 rounded-xl text-cyan-400 hover:text-cyan-300 text-xs sm:text-sm font-bold transition-all"
+                >
+                  {res.title}
+                  <ExternalLink size={12} />
+                </a>
+              ))}
             </div>
           </div>
         </motion.div>
 
         {/* Language Programming Section */}
         <div className="mt-20 text-center mb-12">
-          <h3 className="text-2xl md:text-3xl font-extrabold text-white mb-4 flex items-center justify-center gap-3">
-            <Terminal className="w-8 h-8 text-cyan-400" /> Language Programming
+          <h3 className="text-2xl md:text-3xl font-black flex items-center justify-center mb-4">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500">
+              Language Programming
+            </span>
           </h3>
           <p className="text-gray-400 text-sm max-w-xl mx-auto font-medium">
             Acquire solid coding fundamentals with our structured courses in key programming languages.
@@ -334,8 +322,8 @@ const Domains = () => {
               className={`bg-slate-950/40 backdrop-blur-xl border ${lang.borderColor} ${lang.glowColor} rounded-[2rem] p-6 transition-all duration-300 flex flex-col justify-between cursor-pointer`}
             >
               <div>
-                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-5">
-                  <Terminal className="w-6 h-6 text-cyan-400" />
+                <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-5 overflow-hidden">
+                  <img src={skillForgeLogo} alt="SkillForge Club Logo" className="w-7 h-7 object-contain opacity-90" />
                 </div>
                 <h4 className="text-xl font-bold text-white mb-2">{lang.title}</h4>
                 <p className="text-slate-400 text-sm leading-relaxed mb-4">{lang.desc}</p>
@@ -389,8 +377,12 @@ const Domains = () => {
 
               {/* Modal Header */}
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
-                  {React.createElement(selectedDomain.Icon || Terminal, { className: "w-6 h-6 text-cyan-400" })}
+                <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(6,182,212,0.15)] overflow-hidden">
+                  {selectedDomain.Icon === Terminal ? (
+                    <img src={skillForgeLogo} alt="SkillForge Club Logo" className="w-7 h-7 object-contain opacity-90" />
+                  ) : (
+                    React.createElement(selectedDomain.Icon || Terminal, { className: "w-6 h-6 text-cyan-400" })
+                  )}
                 </div>
                 <div>
                   <h2 className="text-2xl font-black text-white leading-tight">{selectedDomain.title}</h2>
@@ -542,36 +534,6 @@ const Domains = () => {
                     ))}
                   </div>
                 </div>
-
-                {/* 2. Essential Practice Plans Section */}
-                <div>
-                  <h3 className="text-white font-extrabold text-lg mb-4 flex items-center gap-2">
-                    <BookOpen size={18} className="text-cyan-400" /> Curated Sheets & Study Plans
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {dsaResources.map((res, idx) => (
-                      <div 
-                        key={idx}
-                        className="bg-slate-900/40 border border-white/5 rounded-2xl p-5 flex flex-col justify-between hover:border-white/10 transition-colors"
-                      >
-                        <div>
-                          <h4 className="font-bold text-white text-base mb-1.5">{res.title}</h4>
-                          <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-4">{res.description}</p>
-                        </div>
-                        <a
-                          href={res.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-slate-900/80 hover:bg-slate-800 border border-white/10 rounded-xl text-cyan-400 hover:text-cyan-300 text-xs font-bold transition-all text-center self-start"
-                        >
-                          {res.label}
-                          <ExternalLink size={12} />
-                        </a>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
               </div>
 
             </motion.div>
