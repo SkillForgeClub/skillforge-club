@@ -238,7 +238,7 @@ const Home = React.memo(() => {
           </motion.h2>
 
           <motion.p variants={heroItemVariants} className="text-lg md:text-xl text-slate-400 max-w-3xl leading-relaxed mx-auto mb-12">
-            A technical community focused on transforming students into industry-ready professionals through hands-on projects, expert mentorship, and collaborative teamwork.
+            SkillForge is a student-led community where you learn real skills through guided courses, get mentored every step of the way, and move on to real projects and freelance opportunities as you grow.
           </motion.p>
 
           <motion.div
@@ -288,9 +288,9 @@ const Home = React.memo(() => {
             {/* 3 Cards: Purpose, Vision, Mission */}
             <motion.div variants={staggerContainerVariants} className="grid grid-cols-3 gap-3 md:gap-8 mb-16">
               {[
-                { title: 'Our Purpose', desc: 'To act as a bridge for students by showing them a clear path to opportunities and connecting them with like-minded individuals.' },
-                { title: 'Our Vision', desc: 'To cultivate a thriving ecosystem of innovators who are empowered to build real products and solve tangible problems.' },
-                { title: 'Our Mission', desc: 'To transform enthusiastic students into proven, industry-ready professionals through collaboration and mentorship.' }
+                { title: 'Our Purpose', desc: 'To give students a clear, guided path into tech — through courses, mentorship, and hands-on work, without the confusion of figuring it all out alone.' },
+                { title: 'Our Vision', desc: 'A community where learning doesn\'t stop at courses — where the most driven students go on to build real projects and even take on freelance work.' },
+                { title: 'Our Mission', desc: 'To mentor students personally through their learning journey, and open doors to real projects and freelance opportunities for those who are ready to go further.' }
               ].map((card, idx) => (
                 <motion.div
                   key={idx}
@@ -317,11 +317,11 @@ const Home = React.memo(() => {
             >
               <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-[60px] -mr-32 -mt-32" style={{ willChange: 'none' }} />
               <h3 className="text-3xl md:text-4xl font-bold text-white mb-6 relative z-10">What is SkillForge?</h3>
-              <p className="text-lg text-cyan-50/90 leading-relaxed relative z-10">
-                SkillForge is a student-led technical community designed to bridge the gap between classroom theory and real-world software engineering. We believe that true engineering mastery comes from building, launching, and maintaining actual applications.
+              <p className="text-lg text-cyan-50/90 leading-relaxed relative z-10 mb-4">
+                SkillForge is a student-led community built around one idea: you shouldn't have to learn alone. We offer courses across different domains and personally mentor students through them — answering questions, unblocking doubts, and keeping you on track.
               </p>
               <p className="text-lg text-cyan-50/90 leading-relaxed relative z-10">
-                Founded by the Data Science Section, our mission is to foster a collaborative environment where students write clean code, launch web platforms, and deploy intelligent systems, guided by peer mentors with industry-level experience.
+                Students who stay active and show consistency get access to real projects to work on, and eventually, freelance opportunities to put their skills to real use. Founded by the Data Science Section, SkillForge exists to make learning less overwhelming and a lot more hands-on — one mentor, one student, one project at a time.
               </p>
             </motion.div>
           </motion.div>

@@ -1,4 +1,5 @@
 import { supabase } from "../config/db.js";
+import bcrypt from "bcryptjs";
 
 const assignedToMatchesStudent = (task, userId, userEmail) => {
   const assignedTo = String(task.assigned_to || "all").trim().toLowerCase();
@@ -132,6 +133,53 @@ export const updateProfile = async (req, res, next) => {
     }
 
     res.json({ message: "Profile updated successfully", student: { ...updatedStudent, role: "student" } });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    // Fetch the student's current password hash
+    const { data: student, error: fetchErr } = await supabase
+      .from("students")
+      .select("password")
+      .eq("id", userId)
+      .single();
+
+    if (fetchErr || !student) {
+      return res.status(404).json({ error: "Student profile not found." });
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, student.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Incorrect current password." });
+    }
+
+    // Hash the new password
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    // Update students table
+    const { error: updateErr1 } = await supabase
+      .from("students")
+      .update({ password: hashed })
+      .eq("id", userId);
+
+    if (updateErr1) throw updateErr1;
+
+    // Update users table for login synchronization
+    const { error: updateErr2 } = await supabase
+      .from("users")
+      .update({ password: hashed })
+      .eq("id", userId);
+
+    if (updateErr2) throw updateErr2;
+
+    res.json({ message: "Password updated successfully" });
   } catch (err) {
     next(err);
   }

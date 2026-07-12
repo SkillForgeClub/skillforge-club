@@ -414,6 +414,134 @@ const ProfileView = () => {
           </div>
         </form>
       )}
+
+      {!isEditing && <ChangePasswordCard />}
+    </div>
+  );
+};
+
+const ChangePasswordCard = () => {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [status, setStatus] = useState(""); // "", "loading", "success", "error"
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg("");
+
+    // client side validations
+    if (newPassword !== confirmPassword) {
+      setErrorMsg("New passwords do not match.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setErrorMsg("New password must be at least 8 characters long.");
+      return;
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      setErrorMsg("New password must contain at least one uppercase letter.");
+      return;
+    }
+    if (!/[a-z]/.test(newPassword)) {
+      setErrorMsg("New password must contain at least one lowercase letter.");
+      return;
+    }
+    if (!/[0-9]/.test(newPassword)) {
+      setErrorMsg("New password must contain at least one number.");
+      return;
+    }
+
+    setStatus("loading");
+    try {
+      const res = await fetch(`${BASE}/student/change-password`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getTokenFor("student")}`
+        },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update password.");
+      }
+      setStatus("success");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      setErrorMsg(err.message);
+      setStatus("error");
+    }
+  };
+
+  return (
+    <div className="bg-[#1c2536]/80 backdrop-blur-xl border border-white/10 rounded-[3rem] p-5 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden space-y-6">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-[100px] pointer-events-none" />
+      
+      <div>
+        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+          <Lock className="w-5 h-5 text-cyan-400" /> Security Settings
+        </h3>
+        <p className="text-slate-400 text-sm mt-1">Change your portal access password. You will need your login credentials sent to you (current password) and a new password.</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <label className="block text-xs text-slate-400 font-bold uppercase tracking-wider">Current Password</label>
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors text-sm"
+              placeholder="Enter current password"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-xs text-slate-400 font-bold uppercase tracking-wider">New Password</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors text-sm"
+              placeholder="Min. 8 chars, 1 uppercase, 1 number"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-xs text-slate-400 font-bold uppercase tracking-wider">Confirm New Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors text-sm"
+              placeholder="Confirm new password"
+              required
+            />
+          </div>
+        </div>
+
+        {errorMsg && (
+          <p className="text-rose-400 text-sm font-bold">{errorMsg}</p>
+        )}
+        {status === "success" && (
+          <p className="text-emerald-400 text-sm font-bold">Password changed successfully!</p>
+        )}
+
+        <div className="flex justify-end pt-2">
+          <button
+            type="submit"
+            disabled={status === "loading"}
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-90 disabled:opacity-50 text-white font-bold text-sm transition-all duration-200 shadow-md shadow-cyan-500/20"
+          >
+            {status === "loading" ? "Updating..." : "Update Password"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };
