@@ -201,7 +201,7 @@ const LoginCard = ({ role, color, icon: Icon, gradient, title, subtitle, emailPl
             <p className="text-center text-sm text-gray-500 pt-1">
               New here?{" "}
               <a
-                href="https://forms.gle/cWKD9rcUGeSGCnkW8"
+                href="https://forms.gle/966rscCEd8yZJhp96"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`inline-flex items-center gap-1 text-${color}-400 font-bold hover:text-${color}-300 transition-all hover:underline`}
