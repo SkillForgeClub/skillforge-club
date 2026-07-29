@@ -685,6 +685,7 @@ const DOMAIN_DATA = {
       { name: "The Odin Project", url: "https://www.theodinproject.com", type: "Course" },
       { name: "freeCodeCamp", url: "https://www.freecodecamp.org", type: "Course" },
       { name: "CSS Tricks", url: "https://css-tricks.com", type: "Blog" },
+  
     ],
     tools: ["VS Code", "Git & GitHub", "Chrome DevTools", "Postman", "Figma"],
     skills: ["HTML/CSS", "JavaScript", "React", "Node.js", "SQL", "REST APIs"],
@@ -700,6 +701,7 @@ const DOMAIN_DATA = {
       { phase: "Phase 2", title: "Data Analysis & Viz", topics: ["Matplotlib & Seaborn", "EDA Techniques", "Data Cleaning", "Plotly"] },
       { phase: "Phase 3", title: "Machine Learning", topics: ["Scikit-learn", "Regression & Classification", "Model Evaluation", "Feature Engineering"] },
       { phase: "Phase 4", title: "Advanced Topics", topics: ["Deep Learning Basics", "NLP Intro", "SQL for Data", "Deployment"] },
+       
     ],
     resources: [
       { name: "Kaggle Learn", url: "https://www.kaggle.com/learn", type: "Course" },
@@ -707,11 +709,12 @@ const DOMAIN_DATA = {
       { name: "fast.ai", url: "https://www.fast.ai", type: "Course" },
       { name: "Scikit-learn Docs", url: "https://scikit-learn.org", type: "Docs" },
       { name: "StatQuest YouTube", url: "https://www.youtube.com/@statquest", type: "Video" },
+      { name: "DBMS",url:"https://www.oracle.com/in/education/training/database/",type:"course"},
     ],
     tools: ["Python", "Jupyter Notebook", "Pandas", "Scikit-learn", "Tableau"],
     skills: ["Python", "Statistics", "Machine Learning", "Data Visualization", "SQL", "EDA"],
   },
-  "AI & ML": {
+  "AI/ML": {
     icon: <Brain className="w-8 h-8" />,
     color: "emerald",
     gradient: "from-emerald-500/20 to-teal-500/10",
