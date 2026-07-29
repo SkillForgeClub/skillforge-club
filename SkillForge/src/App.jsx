@@ -14,6 +14,7 @@ import Domains from './pages/Domains';
 import Projects from './pages/Projects';
 import Events from './pages/Events';
 import Team from './pages/Team';
+import Alumni from './pages/Alumni';
 import Contact from './pages/Contact';
 import Feedback from './pages/Feedback';
 import Login from './pages/Login';
@@ -63,6 +64,7 @@ function App() {
           <Route path="/projects" element={<Projects />} />
           <Route path="/events" element={<Events />} />
           <Route path="/team" element={<Team />} />
+          <Route path="/alumni" element={<Alumni />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/feedback" element={<Feedback />} />
         </Route>

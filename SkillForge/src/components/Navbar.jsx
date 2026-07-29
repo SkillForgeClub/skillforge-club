@@ -22,6 +22,7 @@ const Navbar = React.memo(() => {
     { name: 'Projects', path: '/projects' },
     { name: 'Events', path: '/events' },
     { name: 'Team', path: '/team' },
+    { name: 'Alumni', path: '/alumni' },
     { name: 'Contact', path: '/contact' },
     { name: 'Feedback', path: '/feedback' },
   ], []);
