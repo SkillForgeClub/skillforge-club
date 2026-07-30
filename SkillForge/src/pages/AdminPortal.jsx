@@ -136,7 +136,7 @@ const MembersTab = () => {
   const [syncing, setSyncing]         = useState(false);
   const [syncResult, setSyncResult]   = useState(null);
 
-  const SHEET_URL = "https://docs.google.com/spreadsheets/d/1iyfVF9z3egFby225ZcLO8BJFTYhnqaxwmMU2W8rQg-w/pub?gid=746403294&single=true&output=csv";
+  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQl2vnGXi5SFo3-1dEta9w7YHbODcAsh9pPC6EPlBfjiScaVeMj3r2SXktMHUU_vbfYAh0OpmTZio3n/pub?gid=746403294&single=true&output=csv";
 
   const handleSync = async () => {
     setSyncing(true);
