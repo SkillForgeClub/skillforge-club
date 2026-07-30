@@ -27,20 +27,26 @@ export const assignStudentToMentor = async (req, res, next) => {
 
     let { data: student } = await supabase.from("students").select("id, name, email").eq("id", studentId).single();
     if (!student) {
-      const { data: fallback } = await supabase.from("users").select("id, name, email").eq("id", studentId).single();
-      student = fallback;
+      const { data: fb } = await supabase.from("users").select("id, name, email").eq("id", studentId).single();
+      student = fb;
     }
     let { data: mentor } = await supabase.from("mentors").select("id, name, email").eq("id", mentorId).single();
     if (!mentor) {
-      const { data: fallback } = await supabase.from("users").select("id, name, email").eq("id", mentorId).single();
-      mentor = fallback;
+      const { data: fb } = await supabase.from("users").select("id, name, email").eq("id", mentorId).single();
+      mentor = fb;
     }
     if (!student) return res.status(404).json({ error: "Student not found." });
     if (!mentor)  return res.status(404).json({ error: "Mentor not found." });
 
-    // We no longer attempt to force-sync the users table here.
-    // If a user is not in the users table, it's a data integrity issue that should be fixed via DB migration/sync scripts,
-    // not silently patched during mentor assignment (which leads to unique constraint crashes).
+    // Ensure both student and mentor exist in users table (required by FK on mentor_assignments)
+    await supabase.from("users").upsert(
+      { id: student.id, name: student.name, email: student.email, password: "__synced__", role: "student" },
+      { onConflict: "id", ignoreDuplicates: true }
+    );
+    await supabase.from("users").upsert(
+      { id: mentor.id, name: mentor.name, email: mentor.email, password: "__synced__", role: "mentor" },
+      { onConflict: "id", ignoreDuplicates: true }
+    );
 
     await supabase.from("mentor_assignments").delete().eq("student_id", studentId);
 
@@ -68,9 +74,13 @@ export const removeAssignment = async (req, res, next) => {
 
 export const getMentorsList = async (req, res, next) => {
   try {
-    const { data, error } = await supabase.from("mentors").select("id, name, email");
-    if (error) return res.status(500).json({ error: error.message });
-    res.json(data);
+    const { data: mentors } = await supabase.from("mentors").select("id, name, email");
+    const { data: userMentors } = await supabase.from("users").select("id, name, email").eq("role", "mentor");
+
+    // Merge both lists, deduplicate by id
+    const map = new Map();
+    [...(mentors || []), ...(userMentors || [])].forEach((m) => map.set(m.id, m));
+    res.json([...map.values()]);
   } catch (err) { next(err); }
 };
 
