@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { GraduationCap, BookOpen, User, ChevronRight, Check, Loader2 } from "lucide-react";
-import { getTokenFor, getUserFor, saveToken, getUser } from "../auth";
+import { GraduationCap, BookOpen, User, ChevronRight, Check, Loader2, Cloud } from "lucide-react";
+import { getTokenFor, getUserFor, saveToken } from "../auth";
 
-const BASE = "http://localhost:5000/api";
+import { API_BASE } from "../config";
+const BASE = API_BASE;
 
 const BRANCHES = ["CSE", "IT", "ECE", "EEE", "MECH", "CIVIL", "AIDS", "AIML", "CSD", "Other"];
 const YEARS    = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
@@ -23,7 +24,7 @@ const Field = ({ label, children }) => (
   </div>
 );
 
-const inputCls  = "field-input px-4 py-3";
+const inputCls  = "w-full bg-slate-800 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-cyan-500 transition-all";
 const selectCls = inputCls;
 
 const Onboarding = () => {
@@ -36,8 +37,10 @@ const Onboarding = () => {
   const [form, setForm]       = useState({
     phone: "", bio: "",
     year: "", branch: "", section: "", rollNumber: "",
-    domains: [], // multiple domains
+    domains: [],
   });
+  const [autoSaveStatus, setAutoSaveStatus] = useState(""); // "", "saving", "saved"
+  const autoSaveTimer = useRef(null);
 
   // Fetch domains from API on mount
   useEffect(() => {
@@ -49,7 +52,7 @@ const Onboarding = () => {
       } catch (err) {
         console.error("Error fetching domains:", err);
         // Fallback to default domains if API fails
-        setDomains(["Web Development", "AI/ML", "Mobile Development", "Cybersecurity", "Data Science", "Cloud Computing", "UI/UX Design", "Blockchain", "IoT", "Other"]);
+        setDomains(["Web Development", "AI & ML", "UI/UX Design", "Data Science"]);
       } finally {
         setDomainsLoading(false);
       }
@@ -58,15 +61,41 @@ const Onboarding = () => {
     fetchDomains();
   }, []);
 
-  const set = (key, val) => setForm((p) => ({ ...p, [key]: val }));
+  const autoSave = (updatedForm) => {
+    const token = getTokenFor("student");
+    if (!token) return;
+    clearTimeout(autoSaveTimer.current);
+    setAutoSaveStatus("saving");
+    autoSaveTimer.current = setTimeout(async () => {
+      try {
+        await fetch(`${BASE}/auth/onboarding`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            ...updatedForm,
+            domainInterest: updatedForm.domains.join(", "),
+          }),
+        });
+        setAutoSaveStatus("saved");
+      } catch { setAutoSaveStatus(""); }
+    }, 800);
+  };
+
+  const set = (key, val) => {
+    const updated = { ...form, [key]: val };
+    setForm(updated);
+    autoSave(updated);
+  };
 
   const toggleDomain = (d) => {
-    setForm((p) => ({
-      ...p,
-      domains: p.domains.includes(d)
-        ? p.domains.filter((x) => x !== d)
-        : [...p.domains, d],
-    }));
+    setForm((p) => {
+      const updated = {
+        ...p,
+        domains: p.domains.includes(d) ? p.domains.filter((x) => x !== d) : [...p.domains, d],
+      };
+      autoSave(updated);
+      return updated;
+    });
   };
 
   const handleNext = () => { setError(""); setStep((s) => s + 1); };
@@ -114,13 +143,19 @@ const Onboarding = () => {
         <div className="text-center mb-10">
           <h1 className="text-4xl font-black text-white mb-2">Welcome to SkillForge 🎉</h1>
           <p className="text-slate-400">Tell us a bit about yourself to get started</p>
+          {autoSaveStatus === "saving" && (
+            <p className="text-xs text-slate-500 mt-2 flex items-center justify-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Saving...</p>
+          )}
+          {autoSaveStatus === "saved" && (
+            <p className="text-xs text-emerald-400 mt-2 flex items-center justify-center gap-1"><Cloud className="w-3 h-3" /> Saved</p>
+          )}
         </div>
 
         {/* Step indicators */}
         <div className="flex items-center justify-center gap-3 mb-10">
           {steps.map((s, i) => (
             <React.Fragment key={s.id}>
-              <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all ${
+              <div className={`flex items-center gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all ${
                 step === s.id ? `bg-${s.color}-500/20 text-${s.color}-400 border border-${s.color}-500/30` :
                 step > s.id  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" :
                                "bg-slate-800 text-slate-500 border border-white/5"
@@ -128,13 +163,13 @@ const Onboarding = () => {
                 {step > s.id ? <Check className="w-4 h-4" /> : <s.icon className="w-4 h-4" />}
                 <span className="hidden sm:block">{s.title}</span>
               </div>
-              {i < steps.length - 1 && <div className={`h-px w-6 ${step > s.id ? "bg-emerald-500" : "bg-slate-700"}`} />}
+              {i < steps.length - 1 && <div className={`h-px w-3 sm:w-6 ${step > s.id ? "bg-emerald-500" : "bg-slate-700"}`} />}
             </React.Fragment>
           ))}
         </div>
 
         {/* Card */}
-        <div className="bg-[#1e293b] border border-white/10 rounded-[2rem] p-8 shadow-2xl">
+        <div className="bg-[#1e293b] border border-white/10 rounded-[2rem] p-5 sm:p-8 shadow-2xl">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}

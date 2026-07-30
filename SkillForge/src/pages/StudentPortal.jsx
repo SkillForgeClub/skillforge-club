@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Mail, Phone, Rocket, BookOpen, Trophy, Target, Clock, CheckCircle2, MessageSquare, BrainCircuit, Code2, Loader2, User, CalendarCheck, ExternalLink, ChevronRight, Star, Layers, Globe, Database, Brain, Cpu, Shield, Smartphone, BarChart2, Send } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mail, Phone, Rocket, BookOpen, Trophy, Target, Clock, CheckCircle2, MessageSquare, BrainCircuit, Code2, Loader2, User, CalendarCheck, ExternalLink, ChevronRight, Star, Layers, Globe, Database, Brain, Cpu, Shield, Smartphone, BarChart2, Send, Lock, Paintbrush } from "lucide-react";
 import { getTokenFor, getUser, logout } from "../auth";
-import ProgressRing from "../components/ProgressRing";
-import StreakWidget from "../components/StreakWidget";
-import ProfileCompletionCard from "../components/ProfileCompletionCard";
-import { OverviewSkeleton, CenteredPanelSkeleton, PanelSkeleton, SkeletonBlock } from "../components/Skeletons";
 
-const BASE = "http://localhost:5000/api";
+// Shared animation variants
+const fadeUp = { initial: { opacity: 0, y: 22 }, animate: { opacity: 1, y: 0, transition: { duration: 0.38, ease: [0.16, 1, 0.3, 1] } }, exit: { opacity: 0, y: -14, transition: { duration: 0.2, ease: 'easeIn' } } };
+const sectionAnim = { initial: { opacity: 0, x: 18 }, animate: { opacity: 1, x: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }, exit: { opacity: 0, x: -18, transition: { duration: 0.18, ease: 'easeIn' } } };
+
+import { API_BASE } from "../config";
+const BASE = API_BASE;
 const authFetch = async (path) => {
   const res = await fetch(`${BASE}${path}`, {
     headers: { Authorization: `Bearer ${getTokenFor("student")}` },
@@ -30,7 +32,6 @@ const OverviewView = () => {
         stats:            overview?.stats            ?? { totalProjects: 0, skillsLearned: 0, overallProgress: 0, tasksCompleted: 0 },
         progress:         overview?.progress         ?? [],
         assignments:      overview?.assignments      ?? [],
-        assignmentsMessage: overview?.assignmentsMessage ?? null,
         registeredEvents: overview?.registeredEvents ?? [],
         activity:         overview?.activity         ?? [],
         assignedMentor:   mentor ?? null,
@@ -53,79 +54,96 @@ const OverviewView = () => {
     }));
   };
 
-  if (loading || !data) return <OverviewSkeleton />;
+  if (loading || !data) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-cyan-400 w-8 h-8" /></div>;
 
   const stats = [
     { title: "Registered Events", value: data.stats.totalProjects, icon: <Rocket className="w-6 h-6 text-cyan-400" />, color: "from-cyan-500/20" },
     { title: "Skills Learned",    value: data.stats.skillsLearned, icon: <BookOpen className="w-6 h-6 text-purple-400" />, color: "from-purple-500/20" },
+    { title: "Overall Progress",  value: data.stats.overallProgress, icon: <Target className="w-6 h-6 text-blue-400" />, color: "from-blue-500/20" },
     { title: "Tasks Completed",   value: data.stats.tasksCompleted, icon: <Trophy className="w-6 h-6 text-yellow-400" />, color: "from-yellow-500/20" },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Stat Cards + Overall Progress ring */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, idx) => (
-          <div key={idx} className={`bg-slate-900/50 border border-white/10 rounded-2xl p-6 bg-gradient-to-br ${stat.color} to-transparent hover:border-white/20 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/20 transition-all duration-300 ease-out group`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-400 text-sm font-medium mb-1">{stat.title}</p>
-                <h3 className="text-3xl font-black text-white tracking-tight">{stat.value}</h3>
-              </div>
-              <div className="p-3 bg-slate-800/50 rounded-xl group-hover:scale-110 transition-transform duration-300 shrink-0">{stat.icon}</div>
+      {/* Plain Text Stats Summary */}
+      <div className="bg-slate-900/30 border border-white/5 rounded-2xl p-6 shadow-sm">
+        {data.assignedMentor ? (
+          <>
+            <h3 className="text-white text-2xl font-black mb-4">
+              Welcome back, {data.profile?.name ? data.profile.name.split(" ")[0] : "Student"}.
+            </h3>
+            <div className="text-slate-300 text-lg space-y-2">
+              <p className="flex items-center gap-2">
+                <span className="text-cyan-400 font-bold">-</span>
+                You have <span className="text-white font-bold">{data.assignments?.length || 0}</span> assignments. 
+                {data.assignments?.length === 0 && <span className="text-slate-500 text-base italic ml-1">(contact your mentor?)</span>}
+              </p>
+              <p className="flex items-center gap-2">
+                <span className="text-purple-400 font-bold">-</span>
+                You have acquired <span className="text-white font-bold">{data.stats.skillsLearned || 0}</span> skills.
+              </p>
             </div>
+          </>
+        ) : (
+          <div className="py-2">
+            <p className="text-white font-sans font-medium text-lg">
+              Mentor is not assigned yet, contact <a href="/contact" className="font-bold text-cyan-400 hover:text-cyan-300 underline decoration-cyan-500/50 underline-offset-4 transition-colors">@admin</a> for mentor assignment.
+            </p>
           </div>
-        ))}
-        <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-6 bg-gradient-to-br from-blue-500/20 to-transparent hover:border-white/20 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/20 transition-all duration-300 ease-out flex items-center gap-4">
-          <ProgressRing value={data.stats.overallProgress} size={72} strokeWidth={6} color="#38bdf8" />
-          <div>
-            <p className="text-slate-400 text-sm font-medium mb-1">Overall Progress</p>
-            <p className="text-xs text-slate-500">Across all assigned tasks</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Momentum: streak + profile completion */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <StreakWidget />
-        <ProfileCompletionCard profile={data.profile} assignedMentor={data.assignedMentor} />
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          {/* Assignments */}
+          {/* Assignments — only visible if mentor is assigned */}
           <div className="bg-[#1e293b]/80 border border-white/5 rounded-2xl p-6 shadow-xl">
             <h3 className="text-xl font-bold text-white mb-6">Assigned Tasks</h3>
-            {data.assignmentsMessage ? (
-              <p className="text-slate-500 text-sm">{data.assignmentsMessage}</p>
-            ) : (
-            <div className="space-y-4">
-              {data.assignments.map((task) => (
-                <div key={task.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-slate-800/80 transition-colors gap-4">
-                  <div className="flex items-center gap-4">
-                    {task.type === "done" ? (
-                      <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
-                    ) : (
-                      <Clock className="w-6 h-6 text-blue-400 flex-shrink-0" />
-                    )}
-                    <div>
-                      <h4 className="font-semibold text-white">{task.title}</h4>
-                      <p className="text-sm text-slate-400">Deadline: <span className={task.type === "urgent" ? "text-rose-400 font-bold" : ""}>{task.deadline}</span></p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-3 py-1 text-xs font-bold rounded-full ${task.status === "Completed" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
-                      {task.status}
-                    </span>
-                    {task.status !== "Completed" && (
-                      <button onClick={() => markDone(task.id)} className="px-3 py-1 text-xs font-bold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-slate-900 transition-all">
-                        Mark Done
-                      </button>
-                    )}
-                  </div>
+            {!data.assignedMentor ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
+                className="flex flex-col items-center justify-center py-10 gap-4 text-center"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-slate-800/80 border border-white/10 flex items-center justify-center">
+                  <Lock className="w-8 h-8 text-slate-500" />
                 </div>
-              ))}
-            </div>
+                <div>
+                  <p className="text-white font-bold text-base">Assignments</p>
+                  <p className="text-slate-400 text-sm mt-1 max-w-xs">No mentor has been assigned yet. Assignments will be available after mentor allocation.</p>
+                </div>
+              </motion.div>
+            ) : (
+              <div className="space-y-4">
+                {data.assignments.length === 0 ? (
+                  <p className="text-slate-500 text-sm text-center py-6">No tasks assigned yet. Your mentor will add tasks soon.</p>
+                ) : data.assignments.map((task) => (
+                  <motion.div key={task.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}
+                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-slate-800/80 transition-colors gap-4">
+                    <div className="flex items-center gap-4">
+                      {task.type === "done" ? (
+                        <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
+                      ) : (
+                        <Clock className="w-6 h-6 text-blue-400 flex-shrink-0" />
+                      )}
+                      <div>
+                        <h4 className="font-semibold text-white">{task.title}</h4>
+                        <p className="text-sm text-slate-400">Deadline: <span className={task.type === "urgent" ? "text-rose-400 font-bold" : ""}>{task.deadline}</span></p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-3 py-1 text-xs font-bold rounded-full ${task.status === "Completed" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
+                        {task.status}
+                      </span>
+                      {task.status !== "Completed" && (
+                        <button onClick={() => markDone(task.id)} className="px-3 py-1 text-xs font-bold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-slate-900 transition-all">
+                          Mark Done
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             )}
           </div>
         </div>
@@ -208,17 +226,13 @@ const ProfileView = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ name: "", domains: [] });
-  const [saveStatus, setSaveStatus] = useState("");
+  const [editForm, setEditForm] = useState({ name: "", phone: "", bio: "", year: "", branch: "", section: "", roll_number: "", domain_interest: "" });
+  const [saveStatus, setSaveStatus] = useState(""); // "", "saving", "saved", "error"
+  const autoSaveTimer = useRef(null);
 
-  const AVAILABLE_DOMAINS = [
-    "Web Development",
-    "Data Science",
-    "AI/ML",
-    "Cybersecurity",
-    "App Development",
-    "Cloud Computing"
-  ];
+  const BRANCHES = ["CSE", "IT", "ECE", "EEE", "MECH", "CIVIL", "AIDS", "AIML", "CSD", "Other"];
+  const YEARS    = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
+  const SECTIONS = ["A", "B", "C", "D", "E"];
 
   const fetchProfile = useCallback(() => {
     authFetch("/student/profile")
@@ -229,11 +243,36 @@ const ProfileView = () => {
       .catch(() => setLoading(false));
   }, []);
 
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+  useEffect(() => { fetchProfile(); }, [fetchProfile]);
 
-  if (loading) return <CenteredPanelSkeleton />;
+  const autoSave = (updatedForm) => {
+    clearTimeout(autoSaveTimer.current);
+    setSaveStatus("saving");
+    autoSaveTimer.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`${BASE}/student/profile`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${getTokenFor("student")}` },
+          body: JSON.stringify(updatedForm),
+        });
+        const json = await res.json();
+        if (!res.ok) { setSaveStatus("error"); return; }
+        setProfile(json.student ?? { ...profile, ...updatedForm });
+        const stored = JSON.parse(localStorage.getItem("studentUser") || "{}");
+        localStorage.setItem("studentUser", JSON.stringify({ ...stored, name: updatedForm.name }));
+        window.dispatchEvent(new Event("user-profile-updated"));
+        setSaveStatus("saved");
+      } catch { setSaveStatus("error"); }
+    }, 800);
+  };
+
+  const setField = (key, val) => {
+    const updated = { ...editForm, [key]: val };
+    setEditForm(updated);
+    autoSave(updated);
+  };
+
+  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-cyan-400 w-8 h-8" /></div>;
   if (!profile) return <div className="text-center text-slate-400 py-20">Could not load profile. Please try again.</div>;
 
   const initials = profile.name?.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2) ?? "??";
@@ -241,55 +280,45 @@ const ProfileView = () => {
 
   const startEdit = () => {
     setEditForm({
-      name: profile.name,
-      domains: [...domainList]
+      name: profile.name || "",
+      phone: profile.phone || "",
+      bio: profile.bio || "",
+      year: profile.year || "",
+      branch: profile.branch || "",
+      section: profile.section || "",
+      roll_number: profile.roll_number || "",
+      domain_interest: profile.domain_interest || "",
     });
     setSaveStatus("");
     setIsEditing(true);
   };
 
-  const toggleDomain = (d) => {
-    setEditForm((prev) => {
-      const exists = prev.domains.includes(d);
-      if (exists) {
-        return { ...prev, domains: prev.domains.filter((item) => item !== d) };
-      } else {
-        return { ...prev, domains: [...prev.domains, d] };
-      }
-    });
-  };
-
   const handleSave = async (e) => {
     e.preventDefault();
-    setSaveStatus("loading");
+    clearTimeout(autoSaveTimer.current);
+    setSaveStatus("saving");
     try {
       const res = await fetch(`${BASE}/student/profile`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getTokenFor("student")}`
-        },
-        body: JSON.stringify({
-          name: editForm.name,
-          domain_interest: editForm.domains.join(", ")
-        })
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${getTokenFor("student")}` },
+        body: JSON.stringify(editForm),
       });
-      if (!res.ok) throw new Error();
-      
-      const updated = await authFetch("/student/profile");
-      setProfile(updated);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Update failed");
+      setProfile(json.student ?? { ...profile, ...editForm });
+      const stored = JSON.parse(localStorage.getItem("studentUser") || "{}");
+      localStorage.setItem("studentUser", JSON.stringify({ ...stored, name: editForm.name }));
+      window.dispatchEvent(new Event("user-profile-updated"));
       setSaveStatus("success");
       setIsEditing(false);
-    } catch {
-      setSaveStatus("error");
-    }
+    } catch { setSaveStatus("error"); }
   };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       
       {!isEditing ? (
-        <div className="bg-[#1c2536]/80 backdrop-blur-xl border border-white/10 rounded-[3rem] p-8 md:p-12 shadow-2xl relative overflow-hidden space-y-8">
+        <div className="bg-[#1c2536]/80 backdrop-blur-xl border border-white/10 rounded-[3rem] p-5 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden space-y-8">
           <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-[100px] -mr-32 -mt-32 pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-[100px] -ml-32 -mb-32 pointer-events-none" />
           
@@ -306,14 +335,12 @@ const ProfileView = () => {
                 <p className="text-slate-400 font-medium text-sm">{profile.email}</p>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+              <div className="grid grid-cols-2 gap-4 pt-2 max-w-md">
                 {[
                   { label: "My Domains", value: domainList.length, color: "text-cyan-400" },
-                  { label: "Registered Events", value: profile.totalProjects, color: "text-purple-400" },
-                  { label: "Year Level", value: "Sophomore", color: "text-white" },
                   { label: "Joined Year", value: new Date(profile.created_at || profile.createdAt).getFullYear(), color: "text-yellow-400" },
                 ].map(({ label, value, color }) => (
-                  <div key={label} className="bg-slate-900/50 border border-white/5 rounded-2xl p-4 flex flex-col justify-center items-center min-h-[85px] overflow-hidden hover:border-white/15 hover:bg-slate-900/70 transition-all duration-200">
+                  <div key={label} className="bg-slate-900/50 border border-white/5 rounded-2xl p-4 flex flex-col justify-center items-center min-h-[85px] overflow-hidden">
                     <span className={`block font-black ${color} mb-0.5 leading-none text-center ${
                       typeof value === "string" && value.length > 7
                         ? "text-xs sm:text-sm md:text-base"
@@ -370,45 +397,67 @@ const ProfileView = () => {
         <form onSubmit={handleSave} className="bg-[#1c2536]/80 backdrop-blur-xl border border-white/10 rounded-[3rem] p-8 md:p-12 shadow-2xl relative overflow-hidden space-y-8">
           <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-[100px] pointer-events-none" />
           
-          <div>
-            <h2 className="text-3xl font-black text-white">Modify Profile Details</h2>
-            <p className="text-slate-400 text-sm mt-1">Update your display information and select the technology pathways you are learning.</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-black text-white">Edit Profile</h2>
+              <p className="text-slate-400 text-sm mt-1">Changes are saved automatically as you type.</p>
+            </div>
+            <div className="text-xs">
+              {saveStatus === "saving" && <span className="text-slate-400 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Saving...</span>}
+              {saveStatus === "saved"  && <span className="text-emerald-400 flex items-center gap-1"><Check className="w-3 h-3" /> Saved</span>}
+              {saveStatus === "error"  && <span className="text-rose-400">Save failed</span>}
+            </div>
           </div>
 
-          <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-2">
-              <label className="block text-sm font-bold text-white">Display Name</label>
-              <input
-                type="text"
-                value={editForm.name}
-                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                className="field-input px-4 py-3"
-                placeholder="Full Name"
-                required
-              />
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Full Name</label>
+              <input type="text" value={editForm.name} onChange={(e) => setField("name", e.target.value)}
+                className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors" required />
             </div>
-
-            <div className="space-y-3">
-              <label className="block text-sm font-bold text-white">Domains of Interest</label>
-              <div className="flex flex-wrap gap-2.5">
-                {AVAILABLE_DOMAINS.map((d) => {
-                  const isSelected = editForm.domains.includes(d);
-                  return (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => toggleDomain(d)}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all duration-200 ${
-                        isSelected
-                          ? "bg-cyan-500 text-slate-950 border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
-                          : "bg-slate-900/40 text-slate-400 border-white/10 hover:border-white/20 hover:text-white"
-                      }`}
-                    >
-                      {d}
-                    </button>
-                  );
-                })}
-              </div>
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Phone</label>
+              <input type="text" value={editForm.phone} onChange={(e) => setField("phone", e.target.value)}
+                className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors" placeholder="e.g. 9876543210" />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Roll Number</label>
+              <input type="text" value={editForm.roll_number} onChange={(e) => setField("roll_number", e.target.value)}
+                className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors" placeholder="e.g. 22CS001" />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Year</label>
+              <select value={editForm.year} onChange={(e) => setField("year", e.target.value)}
+                className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors">
+                <option value="">Select Year</option>
+                {YEARS.map((y) => <option key={y}>{y}</option>)}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Branch</label>
+              <select value={editForm.branch} onChange={(e) => setField("branch", e.target.value)}
+                className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors">
+                <option value="">Select Branch</option>
+                {BRANCHES.map((b) => <option key={b}>{b}</option>)}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Section</label>
+              <select value={editForm.section} onChange={(e) => setField("section", e.target.value)}
+                className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors">
+                <option value="">Select Section</option>
+                {SECTIONS.map((s) => <option key={s}>{s}</option>)}
+              </select>
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Domain Interest <span className="text-slate-500 normal-case font-normal">(comma-separated)</span></label>
+              <input type="text" value={editForm.domain_interest} onChange={(e) => setField("domain_interest", e.target.value)}
+                className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors" placeholder="e.g. Web Development, AI/ML" />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Bio</label>
+              <textarea value={editForm.bio} onChange={(e) => setField("bio", e.target.value)} rows={3}
+                className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors resize-none" placeholder="Tell us about yourself..." />
             </div>
           </div>
 
@@ -435,29 +484,153 @@ const ProfileView = () => {
           </div>
         </form>
       )}
+
+      {!isEditing && <ChangePasswordCard />}
+    </div>
+  );
+};
+
+const ChangePasswordCard = () => {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [status, setStatus] = useState(""); // "", "loading", "success", "error"
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrorMsg("");
+
+    // client side validations
+    if (newPassword !== confirmPassword) {
+      setErrorMsg("New passwords do not match.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setErrorMsg("New password must be at least 8 characters long.");
+      return;
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      setErrorMsg("New password must contain at least one uppercase letter.");
+      return;
+    }
+    if (!/[a-z]/.test(newPassword)) {
+      setErrorMsg("New password must contain at least one lowercase letter.");
+      return;
+    }
+    if (!/[0-9]/.test(newPassword)) {
+      setErrorMsg("New password must contain at least one number.");
+      return;
+    }
+
+    setStatus("loading");
+    try {
+      const res = await fetch(`${BASE}/student/change-password`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getTokenFor("student")}`
+        },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update password.");
+      }
+      setStatus("success");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      setErrorMsg(err.message);
+      setStatus("error");
+    }
+  };
+
+  return (
+    <div className="bg-[#1c2536]/80 backdrop-blur-xl border border-white/10 rounded-[3rem] p-5 sm:p-8 md:p-12 shadow-2xl relative overflow-hidden space-y-6">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-[100px] pointer-events-none" />
+      
+      <div>
+        <h3 className="text-xl font-bold text-white flex items-center gap-2">
+          <Lock className="w-5 h-5 text-cyan-400" /> Security Settings
+        </h3>
+        <p className="text-slate-400 text-sm mt-1">Change your portal access password. You will need your login credentials sent to you (current password) and a new password.</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <label className="block text-xs text-slate-400 font-bold uppercase tracking-wider">Current Password</label>
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors text-sm"
+              placeholder="Enter current password"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-xs text-slate-400 font-bold uppercase tracking-wider">New Password</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors text-sm"
+              placeholder="Min. 8 chars, 1 uppercase, 1 number"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-xs text-slate-400 font-bold uppercase tracking-wider">Confirm New Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full px-4 py-3 bg-slate-900/50 border border-white/10 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors text-sm"
+              placeholder="Confirm new password"
+              required
+            />
+          </div>
+        </div>
+
+        {errorMsg && (
+          <p className="text-rose-400 text-sm font-bold">{errorMsg}</p>
+        )}
+        {status === "success" && (
+          <p className="text-emerald-400 text-sm font-bold">Password changed successfully!</p>
+        )}
+
+        <div className="flex justify-end pt-2">
+          <button
+            type="submit"
+            disabled={status === "loading"}
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:opacity-90 disabled:opacity-50 text-white font-bold text-sm transition-all duration-200 shadow-md shadow-cyan-500/20"
+          >
+            {status === "loading" ? "Updating..." : "Update Password"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 };
 
 // -- Assignments ---------------------------------------------------------------
 const AssignmentsView = () => {
-  const [data, setData]       = useState([]);
-  const [noMentorMessage, setNoMentorMessage] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData]         = useState([]);
+  const [mentor, setMentor]     = useState(null);
+  const [loading, setLoading]   = useState(true);
 
   useEffect(() => {
-    authFetch("/student/assignments").then((d) => {
-      // Backend now returns { hasMentor, message, assignments } instead of a
-      // bare array so the UI can tell "no mentor yet" apart from "no tasks".
-      if (d && Array.isArray(d.assignments)) {
-        setData(d.assignments);
-        setNoMentorMessage(d.hasMentor ? null : d.message);
-      } else {
-        setData(Array.isArray(d) ? d : []);
-        setNoMentorMessage(null);
-      }
+    Promise.all([
+      authFetch("/student/assignments"),
+      authFetch("/assignments/my-mentor"),
+    ]).then(([assignments, mentorData]) => {
+      setData(Array.isArray(assignments) ? assignments : []);
+      setMentor(mentorData && mentorData.id ? mentorData : null);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   const markDone = async (id) => {
@@ -468,160 +641,99 @@ const AssignmentsView = () => {
     setData((prev) => prev.map((a) => a.id === id ? { ...a, status: "Completed", type: "done" } : a));
   };
 
-  if (loading) return (
-    <div className="space-y-6">
-      <SkeletonBlock className="h-9 w-48" />
-      <PanelSkeleton rows={3} title={false} />
-    </div>
-  );
+  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-cyan-400 w-8 h-8" /></div>;
 
-  if (noMentorMessage) {
-    return (
-      <div className="space-y-6">
-        <h2 className="text-3xl font-black text-white border-b border-white/10 pb-4">Assignments</h2>
-        <p className="text-slate-500 text-sm">{noMentorMessage}</p>
+  // No mentor → show locked state
+  if (!mentor) return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      className="space-y-6"
+    >
+      <h2 className="text-3xl font-black text-white border-b border-white/10 pb-4">Assignments</h2>
+      <div className="flex flex-col items-center justify-center py-20 gap-6 text-center">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.1, duration: 0.5, type: "spring", stiffness: 200 }}
+          className="w-24 h-24 rounded-3xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/10 flex items-center justify-center shadow-2xl"
+        >
+          <Lock className="w-12 h-12 text-slate-400" />
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.4 }}>
+          <p className="text-white font-black text-2xl mb-3">Assignments</p>
+          <p className="text-slate-400 text-base max-w-sm leading-relaxed">
+            No mentor has been assigned yet.<br />
+            <span className="text-slate-500 text-sm">Assignments will be available after mentor allocation.</span>
+          </p>
+        </motion.div>
       </div>
-    );
-  }
+    </motion.div>
+  );
 
   const pending   = data.filter((a) => a.status !== "Completed");
   const completed = data.filter((a) => a.status === "Completed");
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className="space-y-6"
+    >
       <h2 className="text-3xl font-black text-white border-b border-white/10 pb-4">Assignments</h2>
 
       <div className="space-y-3">
         <h3 className="text-lg font-bold text-amber-400">Pending ({pending.length})</h3>
-        {pending.length === 0 && <p className="text-slate-500">All caught up! ??</p>}
-        {pending.map((task) => (
-          <div key={task.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-slate-800/80 transition-colors">
+        {data.length === 0 && <p className="text-slate-500">No tasks are assigned yet</p>}
+        {data.length > 0 && pending.length === 0 && <p className="text-slate-500">No tasks are pending, contact your mentor for new tasks</p>}
+        {pending.map((task, i) => (
+          <motion.div
+            key={task.id}
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: i * 0.05 }}
+            className="flex items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-slate-800/80 hover:border-amber-500/20 transition-all"
+          >
             <div className="flex items-center gap-4">
               <Clock className="w-6 h-6 text-amber-400 flex-shrink-0" />
               <div>
                 <h4 className="font-semibold text-white">{task.title}</h4>
-                <p className="text-sm text-slate-400">Deadline: <span className={task.type === "urgent" ? "text-rose-400 font-bold" : ""}>{task.deadline}</span> � {task.domain}</p>
+                <p className="text-sm text-slate-400">Deadline: <span className={task.type === "urgent" ? "text-rose-400 font-bold" : ""}>{task.deadline}</span> · {task.domain}</p>
               </div>
             </div>
             <button onClick={() => markDone(task.id)} className="px-4 py-2 text-xs font-bold rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500 hover:text-slate-900 transition-all">
               Mark Done
             </button>
-          </div>
+          </motion.div>
         ))}
       </div>
 
       <div className="space-y-3">
         <h3 className="text-lg font-bold text-emerald-400">Completed ({completed.length})</h3>
-        {completed.map((task) => (
-          <div key={task.id} className="flex items-center gap-4 p-4 rounded-xl bg-slate-900/30 border border-white/5 opacity-70">
+        {completed.map((task, i) => (
+          <motion.div
+            key={task.id}
+            initial={{ opacity: 0, x: -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: i * 0.05 }}
+            className="flex items-center gap-4 p-4 rounded-xl bg-slate-900/30 border border-white/5 opacity-70"
+          >
             <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
             <div>
               <h4 className="font-semibold text-white line-through">{task.title}</h4>
               <p className="text-sm text-slate-500">{task.domain}</p>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
-// -- Mentor View ---------------------------------------------------------------
-const MentorView = () => {
-  const [mentor, setMentor]   = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    authFetch("/assignments/my-mentor").then((d) => {
-      setMentor(d && d.id ? d : null);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, []);
 
-  if (loading) return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      <SkeletonBlock className="h-9 w-40" />
-      <SkeletonBlock className="h-64 rounded-[2rem]" />
-    </div>
-  );
-
-  return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      <h2 className="text-3xl font-black text-white border-b border-white/10 pb-4">My Mentor</h2>
-      {mentor ? (
-        <div className="bg-gradient-to-br from-blue-900/40 to-slate-900 border border-blue-500/20 rounded-[2rem] p-8 shadow-2xl space-y-6">
-          <div className="flex flex-col sm:flex-row items-center gap-6 mb-2">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-500 flex items-center justify-center text-4xl font-black text-white border-4 border-cyan-500 shadow-[0_0_30px_rgba(34,211,238,0.4)] flex-shrink-0">
-              {mentor.name.charAt(0).toUpperCase()}
-            </div>
-            <div className="text-center sm:text-left">
-              <h3 className="text-3xl font-black text-white">{mentor.name}</h3>
-              <p className="text-cyan-400 font-semibold mt-1">{mentor.email}</p>
-              <p className="text-slate-500 text-sm mt-1">Assigned on {new Date(mentor.assignedAt).toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" })}</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { label: "Role",   value: mentor.role ?? "Mentor",                                                                    color: "text-cyan-400" },
-              { label: "Status", value: "Active",                                                                                   color: "text-emerald-400" },
-              { label: "Since",  value: mentor.created_at ? new Date(mentor.created_at).getFullYear() : new Date(mentor.assignedAt).getFullYear(), color: "text-white" },
-            ].map(({ label, value, color }) => (
-              <div key={label} className="bg-slate-900/50 border border-white/10 rounded-2xl p-4 text-center">
-                <span className={"block text-2xl font-black mb-1 " + color}>{value}</span>
-                <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">{label}</span>
-              </div>
-            ))}
-          </div>
-          <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-6 space-y-4">
-            <p className="text-slate-400 text-sm leading-relaxed">Your mentor is here to guide your learning journey. Reach out for feedback or to schedule a session using the channels below:</p>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              {/* Email Button */}
-              <a
-                href={`mailto:${mentor.email}`}
-                className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-950/40 border border-white/5 hover:border-cyan-500/30 hover:bg-slate-950/80 transition-all group text-center"
-              >
-                <Mail className="w-6 h-6 text-cyan-400 mb-2 group-hover:scale-110 transition-transform" />
-                <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Email</span>
-                <span className="text-white text-xs font-semibold mt-1 truncate max-w-full">{mentor.email}</span>
-              </a>
-
-              {/* Phone Button */}
-              <a
-                href="tel:+919876543210"
-                className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-950/40 border border-white/5 hover:border-emerald-500/30 hover:bg-slate-950/80 transition-all group text-center"
-              >
-                <Phone className="w-6 h-6 text-emerald-400 mb-2 group-hover:scale-110 transition-transform" />
-                <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Phone</span>
-                <span className="text-white text-xs font-semibold mt-1">+91 98765 43210</span>
-              </a>
-
-              {/* WhatsApp Button */}
-              <a
-                href="https://wa.me/919876543210?text=Hi%20Mentor!%20I'm%20a%20student%20from%20SkillForge."
-                target="_blank"
-                rel="noreferrer"
-                className="flex flex-col items-center justify-center p-4 rounded-xl bg-slate-950/40 border border-white/5 hover:border-green-400/30 hover:bg-slate-950/80 transition-all group text-center"
-              >
-                <MessageSquare className="w-6 h-6 text-green-400 mb-2 group-hover:scale-110 transition-transform" />
-                <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">WhatsApp</span>
-                <span className="text-white text-xs font-semibold mt-1">Chat on WhatsApp</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="bg-[#1e293b]/80 border border-white/5 rounded-2xl p-12 shadow-xl text-center">
-          <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center mx-auto mb-6 border border-white/10">
-            <BrainCircuit className="w-10 h-10 text-slate-500" />
-          </div>
-          <h3 className="text-2xl font-black text-white mb-3">No Mentor Assigned Yet</h3>
-          <p className="text-slate-400 text-sm max-w-sm mx-auto">Your admin will assign a mentor to you soon.</p>
-        </div>
-      )}
-    </div>
-  );
-};
 
 // -- Domains ------------------------------------------------------------------
 const DOMAIN_DATA = {
@@ -643,6 +755,7 @@ const DOMAIN_DATA = {
       { name: "The Odin Project", url: "https://www.theodinproject.com", type: "Course" },
       { name: "freeCodeCamp", url: "https://www.freecodecamp.org", type: "Course" },
       { name: "CSS Tricks", url: "https://css-tricks.com", type: "Blog" },
+  
     ],
     tools: ["VS Code", "Git & GitHub", "Chrome DevTools", "Postman", "Figma"],
     skills: ["HTML/CSS", "JavaScript", "React", "Node.js", "SQL", "REST APIs"],
@@ -658,6 +771,7 @@ const DOMAIN_DATA = {
       { phase: "Phase 2", title: "Data Analysis & Viz", topics: ["Matplotlib & Seaborn", "EDA Techniques", "Data Cleaning", "Plotly"] },
       { phase: "Phase 3", title: "Machine Learning", topics: ["Scikit-learn", "Regression & Classification", "Model Evaluation", "Feature Engineering"] },
       { phase: "Phase 4", title: "Advanced Topics", topics: ["Deep Learning Basics", "NLP Intro", "SQL for Data", "Deployment"] },
+       
     ],
     resources: [
       { name: "Kaggle Learn", url: "https://www.kaggle.com/learn", type: "Course" },
@@ -665,6 +779,7 @@ const DOMAIN_DATA = {
       { name: "fast.ai", url: "https://www.fast.ai", type: "Course" },
       { name: "Scikit-learn Docs", url: "https://scikit-learn.org", type: "Docs" },
       { name: "StatQuest YouTube", url: "https://www.youtube.com/@statquest", type: "Video" },
+      { name: "DBMS",url:"https://www.oracle.com/in/education/training/database/",type:"course"},
     ],
     tools: ["Python", "Jupyter Notebook", "Pandas", "Scikit-learn", "Tableau"],
     skills: ["Python", "Statistics", "Machine Learning", "Data Visualization", "SQL", "EDA"],
@@ -691,71 +806,27 @@ const DOMAIN_DATA = {
     tools: ["Python", "PyTorch", "TensorFlow", "Jupyter", "Google Colab"],
     skills: ["Python", "Deep Learning", "NLP", "Computer Vision", "PyTorch", "MLOps"],
   },
-  "Cybersecurity": {
-    icon: <Shield className="w-8 h-8" />,
-    color: "rose",
-    gradient: "from-rose-500/20 to-orange-500/10",
-    border: "border-rose-500/30",
-    description: "Protect systems and networks by learning ethical hacking, penetration testing, and security best practices.",
+  "UI/UX Design": {
+    icon: <Paintbrush className="w-8 h-8" />,
+    color: "purple",
+    gradient: "from-purple-500/20 to-pink-500/10",
+    border: "border-purple-500/30",
+    description: "Design beautiful, user-centric interfaces and craft intuitive user experiences using Figma and modern design principles.",
     roadmap: [
-      { phase: "Phase 1", title: "Networking Basics", topics: ["TCP/IP", "DNS & HTTP", "Linux Fundamentals", "Wireshark"] },
-      { phase: "Phase 2", title: "Security Concepts", topics: ["CIA Triad", "Cryptography", "Authentication", "OWASP Top 10"] },
-      { phase: "Phase 3", title: "Ethical Hacking", topics: ["Kali Linux", "Nmap & Metasploit", "Web App Pentesting", "CTF Challenges"] },
-      { phase: "Phase 4", title: "Advanced Defense", topics: ["SOC Operations", "Incident Response", "Cloud Security", "Certifications"] },
+      { phase: "Phase 1", title: "Design Principles & UX Research", topics: ["User Research", "Information Architecture", "Wireframing", "Typography & Color Theory"] },
+      { phase: "Phase 2", title: "Figma Fundamentals", topics: ["Auto Layout & Components", "Figma Prototyping", "Design Systems", "UI Kits"] },
+      { phase: "Phase 3", title: "High-Fidelity Prototyping", topics: ["Interactive Components", "Micro-interactions", "User Testing", "Heuristic Evaluation"] },
+      { phase: "Phase 4", title: "Portfolio & Handoff", topics: ["Case Studies", "Developer Handoff", "Responsive Design", "Portfolio Building"] },
     ],
     resources: [
-      { name: "TryHackMe", url: "https://tryhackme.com", type: "Platform" },
-      { name: "HackTheBox", url: "https://www.hackthebox.com", type: "Platform" },
-      { name: "OWASP", url: "https://owasp.org", type: "Docs" },
-      { name: "Cybrary", url: "https://www.cybrary.it", type: "Course" },
-      { name: "PortSwigger Web Academy", url: "https://portswigger.net/web-security", type: "Course" },
+      { name: "Figma Resource Library", url: "https://www.figma.com/resource-library", type: "Docs" },
+      { name: "UX Collective", url: "https://uxdesign.cc", type: "Blog" },
+      { name: "Interaction Design Foundation", url: "https://www.interaction-design.org", type: "Course" },
+      { name: "Laws of UX", url: "https://lawsofux.com", type: "Docs" },
+      { name: "Nielsen Norman Group", url: "https://www.nngroup.com", type: "Blog" },
     ],
-    tools: ["Kali Linux", "Burp Suite", "Nmap", "Wireshark", "Metasploit"],
-    skills: ["Networking", "Linux", "Penetration Testing", "Cryptography", "OWASP", "CTF"],
-  },
-  "App Development": {
-    icon: <Smartphone className="w-8 h-8" />,
-    color: "blue",
-    gradient: "from-blue-500/20 to-indigo-500/10",
-    border: "border-blue-500/30",
-    description: "Build cross-platform mobile applications for iOS and Android using React Native or Flutter.",
-    roadmap: [
-      { phase: "Phase 1", title: "Mobile Fundamentals", topics: ["UI/UX for Mobile", "JavaScript/Dart", "Component Design", "Navigation"] },
-      { phase: "Phase 2", title: "React Native / Flutter", topics: ["Core Components", "State Management", "APIs & Networking", "Local Storage"] },
-      { phase: "Phase 3", title: "Native Features", topics: ["Camera & GPS", "Push Notifications", "Authentication", "Offline Support"] },
-      { phase: "Phase 4", title: "Publishing", topics: ["App Store / Play Store", "CI/CD", "Analytics", "Performance"] },
-    ],
-    resources: [
-      { name: "React Native Docs", url: "https://reactnative.dev", type: "Docs" },
-      { name: "Flutter Docs", url: "https://flutter.dev", type: "Docs" },
-      { name: "Expo", url: "https://expo.dev", type: "Tool" },
-      { name: "App Brewery", url: "https://www.appbrewery.co", type: "Course" },
-      { name: "Flutter & Dart - Udemy", url: "https://www.udemy.com", type: "Course" },
-    ],
-    tools: ["VS Code", "Android Studio", "Xcode", "Expo", "Firebase"],
-    skills: ["React Native", "Flutter", "Dart", "Firebase", "REST APIs", "UI/UX"],
-  },
-  "Cloud Computing": {
-    icon: <Layers className="w-8 h-8" />,
-    color: "yellow",
-    gradient: "from-yellow-500/20 to-orange-500/10",
-    border: "border-yellow-500/30",
-    description: "Deploy, manage, and scale applications on cloud platforms like AWS, Azure, and Google Cloud.",
-    roadmap: [
-      { phase: "Phase 1", title: "Cloud Basics", topics: ["Cloud Models (IaaS/PaaS/SaaS)", "Virtualization", "Linux CLI", "Networking"] },
-      { phase: "Phase 2", title: "AWS / Azure Core", topics: ["EC2 & S3", "IAM & Security", "VPC & Networking", "RDS & Databases"] },
-      { phase: "Phase 3", title: "DevOps & Containers", topics: ["Docker", "Kubernetes", "CI/CD Pipelines", "Terraform"] },
-      { phase: "Phase 4", title: "Certifications", topics: ["AWS Solutions Architect", "Azure Administrator", "GCP Associate", "DevOps Engineer"] },
-    ],
-    resources: [
-      { name: "AWS Free Tier", url: "https://aws.amazon.com/free", type: "Platform" },
-      { name: "A Cloud Guru", url: "https://acloudguru.com", type: "Course" },
-      { name: "Google Cloud Skills Boost", url: "https://cloudskillsboost.google", type: "Course" },
-      { name: "KodeKloud", url: "https://kodekloud.com", type: "Course" },
-      { name: "TechWorld with Nana", url: "https://www.youtube.com/@TechWorldwithNana", type: "Video" },
-    ],
-    tools: ["AWS CLI", "Docker", "Kubernetes", "Terraform", "GitHub Actions"],
-    skills: ["AWS/Azure/GCP", "Docker", "Kubernetes", "CI/CD", "Terraform", "Linux"],
+    tools: ["Figma", "Adobe XD", "Miro", "FigJam", "Zeplin"],
+    skills: ["User Research", "Wireframing", "UI Design", "Prototyping", "Interaction Design", "Design Systems"],
   },
 };
 
@@ -797,15 +868,7 @@ const DomainsView = () => {
     authFetch("/student/profile").then((d) => { setProfile(d?.id ? d : null); setLoading(false); }).catch(() => setLoading(false));
   }, []);
 
-  if (loading) return (
-    <div className="space-y-6">
-      <SkeletonBlock className="h-40 rounded-3xl" />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <SkeletonBlock className="lg:col-span-2 h-72 rounded-2xl" />
-        <SkeletonBlock className="h-72 rounded-2xl" />
-      </div>
-    </div>
-  );
+  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-cyan-400 w-8 h-8" /></div>;
 
   // Support multiple comma-separated domains
   const rawDomains = profile?.domain_interest?.trim() || "";
@@ -852,19 +915,41 @@ const DomainsView = () => {
             const dm = DOMAIN_DATA[d] ?? DEFAULT_DOMAIN;
             const cm = colorMap[dm.color] ?? colorMap.cyan;
             return (
-              <button key={d} onClick={() => setActiveTab(idx)}
-                className={`px-4 py-2 rounded-full text-sm font-bold border transition-all ${
+              <motion.button
+                key={d}
+                onClick={() => setActiveTab(idx)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+                className={`px-4 py-2 rounded-full text-sm font-bold border transition-all duration-200 relative ${
                   activeTab === idx ? cm.tab : "bg-slate-800 text-slate-400 border-white/10 hover:text-white"
-                }`}>
-                {d}
-              </button>
+                }`}
+              >
+                {activeTab === idx && (
+                  <motion.span
+                    layoutId="domainTabIndicator"
+                    className="absolute inset-0 rounded-full bg-white/5"
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10">{d}</span>
+              </motion.button>
             );
           })}
         </div>
       )}
 
+      {/* Animated domain content */}
+      <AnimatePresence mode="wait">
+
       {/* Header banner */}
-      <div className={`bg-gradient-to-br ${domain.gradient} border ${domain.border} rounded-3xl p-8`}>
+      <motion.div
+        key={`header-${activeTab}`}
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -12 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className={`bg-gradient-to-br ${domain.gradient} border ${domain.border} rounded-3xl p-8`}
+      >
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
           <div className={`w-16 h-16 rounded-2xl ${c.badge} border flex items-center justify-center flex-shrink-0 ${c.text}`}>
             {domain.icon}
@@ -877,7 +962,7 @@ const DomainsView = () => {
             <p className="text-slate-300 text-sm leading-relaxed max-w-2xl">{domain.description}</p>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-4 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mt-6">
           {[
             { label: "Phases",    value: domain.roadmap.length },
             { label: "Skills",    value: domain.skills.length },
@@ -889,7 +974,7 @@ const DomainsView = () => {
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Roadmap */}
@@ -950,21 +1035,124 @@ const DomainsView = () => {
 
         </div>
       </div>
+      </AnimatePresence>
+    </div>
+  );
+};
 
-      {/* Learning Resources (Full Width Grid Below) */}
-      <div className="bg-[#1c2536]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden mt-8">
+// -- Resources Dashboard --------------------------------------------------------
+const ResourcesView = () => {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [selectedType, setSelectedType] = useState("All");
+
+  useEffect(() => {
+    authFetch("/student/profile")
+      .then((d) => {
+        setProfile(d?.id ? d : null);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="animate-spin text-cyan-400 w-8 h-8" /></div>;
+
+  const rawDomains = profile?.domain_interest?.trim() || "";
+  const domainList = rawDomains ? rawDomains.split(",").map((d) => d.trim()).filter(Boolean) : [];
+
+  if (domainList.length === 0) return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-6">
+      <div className="w-20 h-20 rounded-2xl bg-slate-800 border border-white/10 flex items-center justify-center">
+        <BookOpen className="w-10 h-10 text-slate-400" />
+      </div>
+      <div>
+        <h2 className="text-3xl font-black text-white mb-2">No Domain Selected</h2>
+        <p className="text-slate-400 text-sm max-w-sm">Please subscribe to at least one domain to see learning resources.</p>
+      </div>
+      <a href="/student-portal/profile" className="px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold rounded-xl transition-all text-sm">
+        Choose Domains
+      </a>
+    </div>
+  );
+
+  // Aggregate all resources from subscribed domains
+  let allResources = [];
+  domainList.forEach((dName) => {
+    const dData = DOMAIN_DATA[dName];
+    if (dData && dData.resources) {
+      dData.resources.forEach((r) => {
+        allResources.push({
+          ...r,
+          domain: dName,
+        });
+      });
+    }
+  });
+
+  // Filter based on search & selected type
+  const filtered = allResources.filter((r) => {
+    const matchesSearch = r.name.toLowerCase().includes(search.toLowerCase()) || r.domain.toLowerCase().includes(search.toLowerCase());
+    const matchesType = selectedType === "All" || r.type === selectedType;
+    return matchesSearch && matchesType;
+  });
+
+  const types = ["All", ...new Set(allResources.map((r) => r.type))];
+
+  return (
+    <div className="space-y-8">
+      {/* Header Banner */}
+      <div className="bg-gradient-to-br from-slate-900 via-[#1c2536] to-slate-900 border border-white/10 rounded-3xl p-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-[100px] pointer-events-none" />
         
-        <h3 className="text-xl font-black text-white mb-6 flex items-center gap-2">
-          <BookOpen className="w-6 h-6 text-cyan-400" /> Learning Resources
-        </h3>
-        
+        <h2 className="text-3xl font-black text-white mb-2 flex items-center gap-3">
+          <BookOpen className="text-cyan-400 w-8 h-8" /> Learning Hub
+        </h2>
+        <p className="text-slate-400 text-sm max-w-xl">
+          Access high-quality learning resources, documentation, courses, and toolkits curated for your subscribed learning pathways.
+        </p>
+
+        {/* Filters and search row */}
+        <div className="flex flex-col md:flex-row gap-4 mt-6 items-center">
+          <div className="relative w-full md:w-80">
+            <input
+              type="text"
+              placeholder="Search resources or domains..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-4 pr-10 py-2.5 bg-slate-900 border border-white/10 rounded-xl text-white outline-none focus:border-cyan-500 transition-colors text-sm"
+            />
+          </div>
+          <div className="flex flex-wrap gap-2 w-full md:w-auto">
+            {types.map((type) => (
+              <button
+                key={type}
+                onClick={() => setSelectedType(type)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all duration-200 ${
+                  selectedType === type
+                    ? "bg-cyan-500 text-slate-950 border-cyan-400 shadow-md"
+                    : "bg-slate-900/40 text-slate-400 border-white/10 hover:border-white/20 hover:text-white"
+                }`}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Resource Cards Grid */}
+      {filtered.length === 0 ? (
+        <div className="text-center text-slate-500 py-16">
+          No resources match your search or filter.
+        </div>
+      ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {domain.resources.map((r) => {
+          {filtered.map((r, idx) => {
             const badgeColor = TYPE_COLORS[r.type] ?? TYPE_COLORS.Docs;
             return (
               <a
-                key={r.name}
+                key={idx}
                 href={r.url}
                 target="_blank"
                 rel="noreferrer"
@@ -974,16 +1162,21 @@ const DomainsView = () => {
                   <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${badgeColor}`}>
                     {r.type}
                   </span>
-                  <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-white transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  <span className="text-[10px] font-bold text-slate-500 group-hover:text-cyan-400/80 transition-colors uppercase tracking-wider">
+                    {r.domain}
+                  </span>
                 </div>
-                <span className="text-white text-base font-bold tracking-tight leading-snug group-hover:text-cyan-400 transition-colors">
-                  {r.name}
-                </span>
+                <div className="flex items-center justify-between gap-2 mt-2">
+                  <span className="text-white text-base font-bold tracking-tight leading-snug group-hover:text-cyan-400 transition-colors">
+                    {r.name}
+                  </span>
+                  <ExternalLink className="w-4 h-4 text-slate-500 group-hover:text-white transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 flex-shrink-0" />
+                </div>
               </a>
             );
           })}
         </div>
-      </div>
+      )}
     </div>
   );
 };
@@ -1004,16 +1197,39 @@ const StudentPortal = () => {
   const location = useLocation();
   const path     = location.pathname;
 
+  const getKey = () => {
+    if (path.endsWith("/profile"))     return "profile";
+    if (path.endsWith("/progress"))    return "progress";
+    if (path.endsWith("/assignments")) return "assignments";
+    if (path.endsWith("/domains"))     return "domains";
+    if (path.endsWith("/resources"))   return "resources";
+    return "overview";
+  };
+
   const renderContent = () => {
     if (path.endsWith("/profile"))     return <ProfileView />;
-    if (path.endsWith("/progress"))    return <ProgressView />;
+    if (path.endsWith("/progress"))    return <FallbackView title="Progress Tracking" />;
     if (path.endsWith("/assignments")) return <AssignmentsView />;
     if (path.endsWith("/domains"))     return <DomainsView />;
-    if (path.endsWith("/mentor"))      return <MentorView />;
+    if (path.endsWith("/resources"))   return <ResourcesView />;
     return <OverviewView />;
   };
 
-  return <div className="w-full">{renderContent()}</div>;
+  return (
+    <div className="w-full">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={getKey()}
+          initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          exit={{ opacity: 0, y: -14, filter: 'blur(4px)' }}
+          transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {renderContent()}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
 };
 
 export default StudentPortal;

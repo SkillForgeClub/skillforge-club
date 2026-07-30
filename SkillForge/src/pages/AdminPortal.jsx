@@ -4,11 +4,12 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   Users, BrainCircuit, Rocket, CalendarCheck, LineChart,
   Settings, Plus, Search, Edit2, Trash2, ChevronRight, Mail,
-  Loader2, X, Check
+  Loader2, X, Check, RefreshCw
 } from "lucide-react";
 import { getTokenFor } from "../auth";
+import { API_BASE, ASSET_BASE } from "../config";
 
-const BASE = "http://localhost:5000/api";
+const BASE = API_BASE;
 
 const authFetch = async (path, opts = {}) => {
   const res = await fetch(`${BASE}${path}`, {
@@ -20,13 +21,13 @@ const authFetch = async (path, opts = {}) => {
 };
 
 const StatCard = ({ title, value, icon, color }) => (
-  <div className={`bg-slate-900/50 border border-white/10 rounded-2xl p-6 bg-gradient-to-br ${color} to-transparent hover:border-white/20 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/20 transition-all duration-300 ease-out`}>
+  <div className={`bg-slate-900/50 border border-white/10 rounded-2xl p-6 bg-gradient-to-br ${color} to-transparent hover:border-white/20 transition-all`}>
     <div className="flex items-center justify-between">
       <div>
         <p className="text-slate-400 text-sm font-medium mb-1">{title}</p>
-        <h3 className="text-3xl font-black text-white tracking-tight">{value ?? ""}</h3>
+        <h3 className="text-3xl font-black text-white">{value ?? ""}</h3>
       </div>
-      <div className="p-3 bg-slate-800/50 rounded-xl shrink-0">{icon}</div>
+      <div className="p-3 bg-slate-800/50 rounded-xl">{icon}</div>
     </div>
   </div>
 );
@@ -51,7 +52,7 @@ const TableShell = ({ title, cols, rows, loading, onAdd, addLabel, search, setSe
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={searchPlaceholder}
-            className="field-input rounded-full pl-9 pr-4 py-2.5 text-sm w-64"
+            className="bg-slate-900 border border-white/10 text-sm rounded-full pl-9 pr-4 py-2.5 text-white outline-none focus:border-cyan-500 w-64 transition-colors"
           />
         </div>
         {onAdd && (
@@ -61,24 +62,18 @@ const TableShell = ({ title, cols, rows, loading, onAdd, addLabel, search, setSe
         )}
       </div>
     </div>
-    <div className="table-shell">
-      <table className="min-w-[600px]">
+    <div className="overflow-x-auto">
+      <table className="w-full text-left border-collapse min-w-[600px]">
         <thead>
-          <tr>
-            {cols.map((c) => <th key={c}>{c}</th>)}
+          <tr className="border-b border-white/10 text-slate-400 text-xs uppercase tracking-wider bg-slate-900/50">
+            {cols.map((c) => <th key={c} className="py-4 px-4 font-semibold">{c}</th>)}
           </tr>
         </thead>
         <tbody className="text-sm">
           {loading ? (
-            <tr><td colSpan={cols.length} className="py-16 text-center text-slate-500"><Loader2 className="animate-spin inline w-5 h-5" /></td></tr>
+            <tr><td colSpan={cols.length} className="py-16 text-center text-slate-500"><Loader2 className="animate-spin inline" /></td></tr>
           ) : rows.length === 0 ? (
-            <tr><td colSpan={cols.length} className="p-0">
-              <div className="empty-state">
-                <div className="empty-state-icon"><Search className="w-5 h-5" /></div>
-                <p className="font-medium text-slate-400">No data found</p>
-                <p className="text-xs text-slate-600">Try adjusting your search or check back later.</p>
-              </div>
-            </td></tr>
+            <tr><td colSpan={cols.length} className="py-16 text-center text-slate-500">No data found.</td></tr>
           ) : rows}
         </tbody>
       </table>
@@ -138,6 +133,23 @@ const MembersTab = () => {
   const [assigning, setAssigning]     = useState(null);
   const [modal, setModal]             = useState(null);
   const [modalSaving, setModalSaving] = useState(false);
+  const [syncing, setSyncing]         = useState(false);
+  const [syncResult, setSyncResult]   = useState(null);
+
+  const SHEET_URL = "https://docs.google.com/spreadsheets/d/1iyfVF9z3egFby225ZcLO8BJFTYhnqaxwmMU2W8rQg-w/pub?gid=746403294&single=true&output=csv";
+
+  const handleSync = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    const res = await authFetch("/sync/sheets", {
+      method: "POST",
+      body: JSON.stringify({ sheetUrl: SHEET_URL }),
+    });
+    setSyncing(false);
+    if (res.error) { setSyncResult({ error: res.error }); return; }
+    setSyncResult(res);
+    load();
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -181,14 +193,15 @@ const MembersTab = () => {
       method: "POST",
       body: JSON.stringify({ studentId: modal.student.id, mentorId: modal.newMentor.id }),
     });
+    setModalSaving(false);
+    setModal(null);
+    if (res.error) return alert(res.error);
     if (res.assignment) {
       setAssignments((prev) => [
         ...prev.filter((a) => a.student?.id !== modal.student.id),
         res.assignment,
       ]);
     }
-    setModalSaving(false);
-    setModal(null);
   };
 
   const getMentorForStudent = (studentId) =>
@@ -235,7 +248,7 @@ const MembersTab = () => {
               value={assignedMentor?.id ?? ""}
               onChange={(e) => { if (e.target.value) openModal(m, assignedMentor, e.target.value); }}
               disabled={assigning === m.id}
-              className="field-input rounded-lg px-3 py-2 text-xs disabled:opacity-50"
+              className="bg-slate-800 border border-white/10 text-xs rounded-lg px-3 py-2 text-white outline-none focus:border-cyan-500 transition-all disabled:opacity-50"
             >
               <option value="" disabled>Assign mentor...</option>
               {mentors.map((mentor) => (
@@ -312,26 +325,47 @@ const MembersTab = () => {
           saving={modalSaving}
         />
       )}
-      <div className="flex gap-2">
-        {[
-          { key: "students", label: "Students", count: students.length, color: "cyan" },
-          { key: "mentors",  label: "Mentors",  count: mentors.length,  color: "emerald" },
-        ].map(({ key, label, count, color }) => (
-          <button
-            key={key}
-            onClick={() => { setSubTab(key); setSearch(""); }}
-            className={`px-5 py-2 rounded-full text-sm font-bold border transition-all ${
-              subTab === key
-                ? color === "cyan"
-                  ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40"
-                  : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                : "bg-slate-800 text-slate-400 border-white/10 hover:text-white"
-            }`}
-          >
-            {label}
-            <span className="ml-2 px-1.5 py-0.5 rounded-full bg-white/10 text-xs">{count}</span>
-          </button>
-        ))}
+      {syncResult && (
+        <div className={`px-4 py-3 rounded-xl text-sm font-semibold border ${
+          syncResult.error
+            ? "bg-rose-500/10 border-rose-500/20 text-rose-400"
+            : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+        }`}>
+          {syncResult.error
+            ? `Sync failed: ${syncResult.error}`
+            : `Sync complete — ${syncResult.created} created, ${syncResult.updated} updated, ${syncResult.skipped} skipped (${syncResult.total} total)`}
+        </div>
+      )}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex gap-2">
+          {[
+            { key: "students", label: "Students", count: students.length, color: "cyan" },
+            { key: "mentors",  label: "Mentors",  count: mentors.length,  color: "emerald" },
+          ].map(({ key, label, count, color }) => (
+            <button
+              key={key}
+              onClick={() => { setSubTab(key); setSearch(""); }}
+              className={`px-5 py-2 rounded-full text-sm font-bold border transition-all ${
+                subTab === key
+                  ? color === "cyan"
+                    ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40"
+                    : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                  : "bg-slate-800 text-slate-400 border-white/10 hover:text-white"
+              }`}
+            >
+              {label}
+              <span className="ml-2 px-1.5 py-0.5 rounded-full bg-white/10 text-xs">{count}</span>
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={handleSync}
+          disabled={syncing}
+          className="h-9 px-4 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold rounded-full flex items-center gap-2 text-sm transition-all"
+        >
+          {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+          {syncing ? "Syncing..." : "Sync from Sheet"}
+        </button>
       </div>
       {subTab === "students" && (
         <TableShell
@@ -437,13 +471,13 @@ const EventsTab = () => {
                 <label className="text-xs text-slate-400 font-semibold uppercase">{label}</label>
                 <input type={type} required={required} value={form[key]}
                   onChange={(e) => setForm({ ...form, [key]: e.target.value })}
-                  className="field-input px-4 py-3 text-sm" />
+                  className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-all text-sm" />
               </div>
             ))}
             <div className="sm:col-span-2 space-y-1">
               <label className="text-xs text-slate-400 font-semibold uppercase">Description</label>
               <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3}
-                className="field-input px-4 py-3 text-sm resize-none" />
+                className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-all text-sm resize-none" />
             </div>
             {formError && <div className="sm:col-span-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">{formError}</div>}
             <div className="sm:col-span-2 flex gap-3 justify-end">
@@ -511,7 +545,7 @@ const ProjectsTab = () => {
     <tr key={p.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
       <td className="py-4 px-4">
         <div className="flex items-center gap-3">
-          {p.image && <img src={p.image.startsWith('/uploads/') ? `http://localhost:5000${p.image}` : p.image} alt={p.title} className="w-10 h-10 rounded-lg object-cover border border-white/10" />}
+          {p.image && <img src={p.image.startsWith('/uploads/') ? `${ASSET_BASE}${p.image}` : p.image} alt={p.title} className="w-10 h-10 rounded-lg object-cover border border-white/10" />}
           <span className="font-bold text-white">{p.title}</span>
         </div>
       </td>
@@ -549,13 +583,13 @@ const ProjectsTab = () => {
                 <label className="text-xs text-slate-400 font-semibold uppercase">{label}</label>
                 <input required={required} value={form[k]}
                   onChange={(e) => setForm({ ...form, [k]: e.target.value })}
-                  className="field-input px-4 py-3 text-sm" />
+                  className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-all text-sm" />
               </div>
             ))}
             <div className="sm:col-span-2 space-y-1">
               <label className="text-xs text-slate-400 font-semibold uppercase">Description <span className="text-red-400">*</span></label>
               <textarea required value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3}
-                className="field-input px-4 py-3 text-sm resize-none" />
+                className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-all text-sm resize-none" />
             </div>
             {formError && <div className="sm:col-span-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3">{formError}</div>}
             <div className="sm:col-span-2 flex gap-3 justify-end">
@@ -630,7 +664,7 @@ const TeamTab = () => {
       <td className="py-4 px-4">
         <div className="flex items-center gap-3">
           {m.avatar
-            ? <img src={m.avatar.startsWith('/uploads/') ? `http://localhost:5000${m.avatar}` : m.avatar} alt={m.name || "Team Member"} className="w-9 h-9 rounded-full object-cover border border-white/10 flex-shrink-0" />
+            ? <img src={m.avatar.startsWith('/uploads/') ? `${ASSET_BASE}${m.avatar}` : m.avatar} alt={m.name || "Team Member"} className="w-9 h-9 rounded-full object-cover border border-white/10 flex-shrink-0" />
             : <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-500 flex items-center justify-center text-sm font-black text-white flex-shrink-0">{((m.name || " ").charAt(0)).toUpperCase()}</div>
           }
           <div>
@@ -666,13 +700,13 @@ const TeamTab = () => {
               <div key={k} className="space-y-1">
                 <label className="text-xs text-slate-400 font-semibold uppercase">{label}</label>
                 <input required={["name","role"].includes(k)} value={form[k]} onChange={(e) => setForm({ ...form, [k]: e.target.value })}
-                  className="field-input px-4 py-3 text-sm" />
+                  className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-all text-sm" />
               </div>
             ))}
             <div className="sm:col-span-2 space-y-1">
               <label className="text-xs text-slate-400 font-semibold uppercase">Bio</label>
               <textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={2}
-                className="field-input px-4 py-3 text-sm resize-none" />
+                className="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-500 transition-all text-sm resize-none" />
             </div>
             <div className="sm:col-span-2 flex gap-3 justify-end">
               <button type="button" onClick={() => setShowForm(false)} className="px-6 py-2.5 rounded-xl bg-slate-700 text-slate-300 font-bold text-sm">Cancel</button>
@@ -742,7 +776,7 @@ const MessagesTab = () => {
         <div className="relative">
           <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search messages..."
-            className="field-input rounded-full pl-9 pr-4 py-2.5 text-sm w-64" />
+            className="bg-slate-900 border border-white/10 text-sm rounded-full pl-9 pr-4 py-2.5 text-white outline-none focus:border-cyan-500 w-64 transition-colors" />
         </div>
       </div>
       <div className="flex gap-2">
@@ -760,28 +794,22 @@ const MessagesTab = () => {
           </button>
         ))}
       </div>
-      <div className="table-shell">
-        <table className="min-w-[500px]">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse min-w-[500px]">
           <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>{subTab === "feedback" ? "Rating" : "Subject"}</th>
-              <th>Date</th>
-              <th>Actions</th>
+            <tr className="border-b border-white/10 text-slate-400 text-xs uppercase tracking-wider bg-slate-900/50">
+              <th className="py-3 px-4">Name</th>
+              <th className="py-3 px-4">Email</th>
+              <th className="py-3 px-4">{subTab === "feedback" ? "Rating" : "Subject"}</th>
+              <th className="py-3 px-4">Date</th>
+              <th className="py-3 px-4">Actions</th>
             </tr>
           </thead>
           <tbody className="text-sm">
             {loading ? (
-              <tr><td colSpan={5} className="py-16 text-center text-slate-500"><Loader2 className="animate-spin inline w-5 h-5" /></td></tr>
+              <tr><td colSpan={5} className="py-16 text-center text-slate-500"><Loader2 className="animate-spin inline" /></td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={5} className="p-0">
-                <div className="empty-state">
-                  <div className="empty-state-icon"><Mail className="w-5 h-5" /></div>
-                  <p className="font-medium text-slate-400">No {subTab} messages yet</p>
-                  <p className="text-xs text-slate-600">New submissions will show up here.</p>
-                </div>
-              </td></tr>
+              <tr><td colSpan={5} className="py-16 text-center text-slate-500">No {subTab} messages yet.</td></tr>
             ) : filtered.map((m) => (
               <React.Fragment key={m.id}>
                 <tr onClick={() => handleRowClick(m.id)}

@@ -8,8 +8,10 @@ export const getAssignments = async (req, res, next) => {
     if (error) return res.status(500).json({ error: error.message });
 
     const results = await Promise.all((data || []).map(async (a) => {
-      const { data: student } = await supabase.from("students").select("id, name, email").eq("id", a.student_id).single();
-      const { data: mentor }  = await supabase.from("mentors").select("id, name, email").eq("id", a.mentor_id).single();
+      let { data: student } = await supabase.from("students").select("id, name, email").eq("id", a.student_id).single();
+      if (!student) { const { data: fb } = await supabase.from("users").select("id, name, email").eq("id", a.student_id).single(); student = fb; }
+      let { data: mentor }  = await supabase.from("mentors").select("id, name, email").eq("id", a.mentor_id).single();
+      if (!mentor)  { const { data: fb } = await supabase.from("users").select("id, name, email").eq("id", a.mentor_id).single();  mentor  = fb; }
       return { id: a.id, assignedAt: a.assigned_at, student, mentor };
     }));
 
@@ -23,19 +25,27 @@ export const assignStudentToMentor = async (req, res, next) => {
     if (!studentId || !mentorId)
       return res.status(400).json({ error: "studentId and mentorId are required." });
 
-    const { data: student } = await supabase.from("students").select("id, name, email").eq("id", studentId).single();
-    const { data: mentor }  = await supabase.from("mentors").select("id, name, email, password").eq("id", mentorId).single();
+    let { data: student } = await supabase.from("students").select("id, name, email").eq("id", studentId).single();
+    if (!student) {
+      const { data: fb } = await supabase.from("users").select("id, name, email").eq("id", studentId).single();
+      student = fb;
+    }
+    let { data: mentor } = await supabase.from("mentors").select("id, name, email").eq("id", mentorId).single();
+    if (!mentor) {
+      const { data: fb } = await supabase.from("users").select("id, name, email").eq("id", mentorId).single();
+      mentor = fb;
+    }
     if (!student) return res.status(404).json({ error: "Student not found." });
     if (!mentor)  return res.status(404).json({ error: "Mentor not found." });
 
-    // Ensure both exist in users table (FK requirement)
+    // Ensure both student and mentor exist in users table (required by FK on mentor_assignments)
     await supabase.from("users").upsert(
-      { id: student.id, name: student.name, email: student.email, password: "", role: "student" },
-      { onConflict: "id" }
+      { id: student.id, name: student.name, email: student.email, password: "__synced__", role: "student" },
+      { onConflict: "id", ignoreDuplicates: true }
     );
     await supabase.from("users").upsert(
-      { id: mentor.id, name: mentor.name, email: mentor.email, password: mentor.password || "", role: "mentor" },
-      { onConflict: "id" }
+      { id: mentor.id, name: mentor.name, email: mentor.email, password: "__synced__", role: "mentor" },
+      { onConflict: "id", ignoreDuplicates: true }
     );
 
     await supabase.from("mentor_assignments").delete().eq("student_id", studentId);
@@ -64,9 +74,13 @@ export const removeAssignment = async (req, res, next) => {
 
 export const getMentorsList = async (req, res, next) => {
   try {
-    const { data, error } = await supabase.from("mentors").select("id, name, email");
-    if (error) return res.status(500).json({ error: error.message });
-    res.json(data);
+    const { data: mentors } = await supabase.from("mentors").select("id, name, email");
+    const { data: userMentors } = await supabase.from("users").select("id, name, email").eq("role", "mentor");
+
+    // Merge both lists, deduplicate by id
+    const map = new Map();
+    [...(mentors || []), ...(userMentors || [])].forEach((m) => map.set(m.id, m));
+    res.json([...map.values()]);
   } catch (err) { next(err); }
 };
 
