@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   Users, BrainCircuit, Rocket, CalendarCheck, LineChart,
   Settings, Plus, Search, Edit2, Trash2, ChevronRight, Mail,
-  Loader2, X, Check
+  Loader2, X, Check, RefreshCw
 } from "lucide-react";
 import { getTokenFor } from "../auth";
 import { API_BASE, ASSET_BASE } from "../config";
@@ -133,6 +133,18 @@ const MembersTab = () => {
   const [assigning, setAssigning]     = useState(null);
   const [modal, setModal]             = useState(null);
   const [modalSaving, setModalSaving] = useState(false);
+  const [syncing, setSyncing]         = useState(false);
+  const [syncResult, setSyncResult]   = useState(null);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    const res = await authFetch("/sync/sheets", { method: "POST" });
+    setSyncing(false);
+    if (res.error) { setSyncResult({ error: res.error }); return; }
+    setSyncResult(res);
+    load();
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -308,26 +320,47 @@ const MembersTab = () => {
           saving={modalSaving}
         />
       )}
-      <div className="flex gap-2">
-        {[
-          { key: "students", label: "Students", count: students.length, color: "cyan" },
-          { key: "mentors",  label: "Mentors",  count: mentors.length,  color: "emerald" },
-        ].map(({ key, label, count, color }) => (
-          <button
-            key={key}
-            onClick={() => { setSubTab(key); setSearch(""); }}
-            className={`px-5 py-2 rounded-full text-sm font-bold border transition-all ${
-              subTab === key
-                ? color === "cyan"
-                  ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40"
-                  : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                : "bg-slate-800 text-slate-400 border-white/10 hover:text-white"
-            }`}
-          >
-            {label}
-            <span className="ml-2 px-1.5 py-0.5 rounded-full bg-white/10 text-xs">{count}</span>
-          </button>
-        ))}
+      {syncResult && (
+        <div className={`px-4 py-3 rounded-xl text-sm font-semibold border ${
+          syncResult.error
+            ? "bg-rose-500/10 border-rose-500/20 text-rose-400"
+            : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+        }`}>
+          {syncResult.error
+            ? `Sync failed: ${syncResult.error}`
+            : `Sync complete — ${syncResult.created} created, ${syncResult.updated} updated, ${syncResult.skipped} skipped (${syncResult.total} total)`}
+        </div>
+      )}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex gap-2">
+          {[
+            { key: "students", label: "Students", count: students.length, color: "cyan" },
+            { key: "mentors",  label: "Mentors",  count: mentors.length,  color: "emerald" },
+          ].map(({ key, label, count, color }) => (
+            <button
+              key={key}
+              onClick={() => { setSubTab(key); setSearch(""); }}
+              className={`px-5 py-2 rounded-full text-sm font-bold border transition-all ${
+                subTab === key
+                  ? color === "cyan"
+                    ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40"
+                    : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                  : "bg-slate-800 text-slate-400 border-white/10 hover:text-white"
+              }`}
+            >
+              {label}
+              <span className="ml-2 px-1.5 py-0.5 rounded-full bg-white/10 text-xs">{count}</span>
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={handleSync}
+          disabled={syncing}
+          className="h-9 px-4 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold rounded-full flex items-center gap-2 text-sm transition-all"
+        >
+          {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+          {syncing ? "Syncing..." : "Sync from Sheet"}
+        </button>
       </div>
       {subTab === "students" && (
         <TableShell
