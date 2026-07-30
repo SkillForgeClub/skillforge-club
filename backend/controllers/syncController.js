@@ -111,10 +111,18 @@ export const syncFromSheet = async (req, res, next) => {
       };
 
       if (existing) {
-        // Update profile fields but don't overwrite password if already hashed
-        await supabase.from("students").update(studentData).eq("id", existing.id);
-        // Mirror to users table
-        await supabase.from("users").update({ name, branch }).eq("id", existing.id);
+        // Always update password from sheet so login credentials stay in sync
+        const hashed = plainPassword
+          ? await bcrypt.hash(plainPassword, 10)
+          : existing.password;
+
+        await supabase.from("students")
+          .update({ ...studentData, password: hashed })
+          .eq("id", existing.id);
+
+        await supabase.from("users")
+          .update({ name, branch, password: hashed })
+          .eq("id", existing.id);
         updated++;
       } else {
         // Hash the plain-text password from the sheet
