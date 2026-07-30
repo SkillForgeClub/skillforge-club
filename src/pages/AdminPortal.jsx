@@ -136,10 +136,15 @@ const MembersTab = () => {
   const [syncing, setSyncing]         = useState(false);
   const [syncResult, setSyncResult]   = useState(null);
 
+  const SHEET_URL = "https://docs.google.com/spreadsheets/d/1iyfVF9z3egFby225ZcLO8BJFTYhnqaxwmMU2W8rQg-w/pub?gid=746403294&single=true&output=csv";
+
   const handleSync = async () => {
     setSyncing(true);
     setSyncResult(null);
-    const res = await authFetch("/sync/sheets", { method: "POST" });
+    const res = await authFetch("/sync/sheets", {
+      method: "POST",
+      body: JSON.stringify({ sheetUrl: SHEET_URL }),
+    });
     setSyncing(false);
     if (res.error) { setSyncResult({ error: res.error }); return; }
     setSyncResult(res);
