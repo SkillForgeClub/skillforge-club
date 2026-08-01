@@ -1,0 +1,11 @@
+{
+  "buildCommand": "cd SkillForge && npm run build",
+  "outputDirectory": "SkillForge/dist",
+  "installCommand": "cd SkillForge && npm install",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

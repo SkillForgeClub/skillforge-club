@@ -1,0 +1,183 @@
+import { supabase } from "../config/db.js";
+import bcrypt from "bcryptjs";
+
+const assignedToMatchesStudent = (task, userId, userEmail) => {
+  const assignedTo = String(task.assigned_to || "all").trim().toLowerCase();
+  const normalizedId = String(userId).trim().toLowerCase();
+  const normalizedEmail = String(userEmail || "").trim().toLowerCase();
+  return (
+    assignedTo === "" ||
+    assignedTo === "all" ||
+    assignedTo === normalizedId ||
+    (normalizedEmail && assignedTo === normalizedEmail)
+  );
+};
+
+export const getOverview = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    const { data: user } = await supabase.from("students").select("email").eq("id", userId).single();
+    const { data: myRegs } = await supabase.from("registrations").select("event_id, event_title, registered_at").ilike("email", user?.email || "");
+    const { data: allTasks } = await supabase.from("tasks").select("*");
+    const myTasks = (allTasks || []).filter((task) => assignedToMatchesStudent(task, userId, user?.email));
+
+    const completed = (myTasks || []).filter((t) => t.status === "Completed").length;
+    const totalTasks = (myTasks || []).length;
+
+    const domains = [...new Set((myTasks || []).map((t) => t.domain))];
+    const progress = domains.map((domain) => {
+      const dt = (myTasks || []).filter((t) => t.domain === domain);
+      const done = dt.filter((t) => t.status === "Completed").length;
+      const level = dt.length ? Math.round((done / dt.length) * 100) : 0;
+      return { id: domain, domain, level, tier: level >= 70 ? "Advanced" : level >= 40 ? "Intermediate" : "Beginner" };
+    });
+
+    res.json({
+      stats: {
+        totalProjects: myRegs?.length || 0,
+        skillsLearned: domains.length,
+        overallProgress: `${completed}/${totalTasks}`,
+        tasksCompleted: `${completed}/${totalTasks}`,
+      },
+      assignments: (myTasks || []).map((t) => ({ ...t, type: t.status === "Completed" ? "done" : "pending" })),
+      registeredEvents: (myRegs || []).map((r) => ({
+        eventId: r.event_id,
+        eventTitle: r.event_title,
+        registeredAt: r.registered_at,
+      })),
+      progress,
+      activity: [],
+    });
+  } catch (err) { next(err); }
+};
+
+export const getAssignments = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { data: user } = await supabase.from("students").select("email").eq("id", userId).single();
+    const { data, error } = await supabase.from("tasks").select("*");
+    if (error) return res.status(500).json({ error: error.message });
+    const tasks = (data || []).filter((task) => assignedToMatchesStudent(task, userId, user?.email));
+    res.json(tasks);
+  } catch (err) { next(err); }
+};
+
+export const completeAssignment = async (req, res, next) => {
+  try {
+    const { data, error } = await supabase
+      .from("tasks")
+      .update({ status: "Completed" })
+      .eq("id", req.params.id)
+      .select().single();
+    if (error || !data) return res.status(404).json({ error: "Assignment not found." });
+    res.json({ message: "Marked as completed.", assignment: data });
+  } catch (err) { next(err); }
+};
+
+export const getProgress = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { data: user } = await supabase.from("students").select("email").eq("id", userId).single();
+    const { data } = await supabase.from("tasks").select("domain, status, assigned_to");
+    const tasks = (data || []).filter((task) => assignedToMatchesStudent(task, userId, user?.email));
+
+    const domains = [...new Set(tasks.map((t) => t.domain))];
+    const result = domains.map((domain) => {
+      const domainTasks = tasks.filter((t) => t.domain === domain);
+      const done = domainTasks.filter((t) => t.status === "Completed").length;
+      const level = domainTasks.length ? Math.round((done / domainTasks.length) * 100) : 0;
+      return { domain, level, tier: level >= 70 ? "Advanced" : level >= 40 ? "Intermediate" : "Beginner" };
+    });
+
+    res.json(result);
+  } catch (err) { next(err); }
+};
+
+export const getProfile = async (req, res, next) => {
+  try {
+    const { data: user } = await supabase.from("students").select("id, name, email, phone, bio, year, branch, section, roll_number, domain_interest, created_at").eq("id", req.user.id).single();
+    if (!user) return res.status(404).json({ error: "User not found." });
+    const { data: myRegs } = await supabase.from("registrations").select("*").ilike("email", user.email);
+    res.json({ ...user, role: "student", totalProjects: myRegs?.length || 0, registeredEvents: myRegs || [] });
+  } catch (err) { next(err); }
+};
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { name, domain_interest, phone, bio, year, branch, section, roll_number } = req.body;
+    const updates = {};
+    if (name !== undefined && name.trim())       updates.name            = name.trim();
+    if (domain_interest !== undefined)           updates.domain_interest = domain_interest;
+    if (phone !== undefined)                     updates.phone           = phone;
+    if (bio !== undefined)                       updates.bio             = bio;
+    if (year !== undefined)                      updates.year            = year;
+    if (branch !== undefined)                    updates.branch          = branch;
+    if (section !== undefined)                   updates.section         = section;
+    if (roll_number !== undefined)               updates.roll_number     = roll_number;
+
+    if (Object.keys(updates).length === 0)
+      return res.status(400).json({ error: "No valid fields to update." });
+
+    const { data: updatedStudent, error: err1 } = await supabase
+      .from("students")
+      .update(updates)
+      .eq("id", req.user.id)
+      .select("id, name, email, phone, bio, year, branch, section, roll_number, domain_interest, created_at")
+      .single();
+
+    if (err1) throw err1;
+
+    if (updates.name)
+      await supabase.from("users").update({ name: updates.name }).eq("id", req.user.id);
+
+    res.json({ message: "Profile updated successfully", student: { ...updatedStudent, role: "student" } });
+  } catch (err) { next(err); }
+};
+
+export const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    // Fetch the student's current password hash
+    const { data: student, error: fetchErr } = await supabase
+      .from("students")
+      .select("password")
+      .eq("id", userId)
+      .single();
+
+    if (fetchErr || !student) {
+      return res.status(404).json({ error: "Student profile not found." });
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, student.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Incorrect current password." });
+    }
+
+    // Hash the new password
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    // Update students table
+    const { error: updateErr1 } = await supabase
+      .from("students")
+      .update({ password: hashed })
+      .eq("id", userId);
+
+    if (updateErr1) throw updateErr1;
+
+    // Update users table for login synchronization
+    const { error: updateErr2 } = await supabase
+      .from("users")
+      .update({ password: hashed })
+      .eq("id", userId);
+
+    if (updateErr2) throw updateErr2;
+
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
