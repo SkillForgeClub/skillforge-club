@@ -49,7 +49,7 @@ const Footer = React.memo(() => {
               <img src={logoImage} alt="SkillForge Logo" className="h-12 w-auto object-contain drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
               <div>
                 <p className="font-black text-xl text-white tracking-wide leading-none">SkillForge</p>
-                <p className="text-xs text-cyan-400 font-semibold tracking-widest uppercase mt-0.5">VIIT Club</p>
+                <p className="text-xs text-cyan-400 font-semibold tracking-widest uppercase mt-0.5">Data Science Club</p>
               </div>
             </div>
             <p className="text-slate-400 text-sm leading-relaxed max-w-xs">

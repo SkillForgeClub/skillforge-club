@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, MapPin, Send, Share2, Github, Linkedin, Instagram, Youtube, Facebook, Brain } from 'lucide-react';
+import { Mail, MapPin, Send, Share2, Github, Linkedin, Instagram, Youtube, Facebook, Brain, GraduationCap } from 'lucide-react';
 import { api } from '../api';
 
 const Contact = () => {
@@ -138,15 +138,13 @@ const Contact = () => {
             transition={{ duration: 0.6 }}
             className="space-y-6"
           >
-            {/* Card 1: Branch */}
-            <div className="bg-slate-950/40 backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-2xl flex items-start gap-4 shadow-xl hover:border-cyan-500/30 transition-all duration-300">
+            {/* Card 1: Department */}
+            <div className="bg-slate-950/40 backdrop-blur-xl border border-white/10 p-6 sm:p-8 rounded-2xl flex items-center gap-4 shadow-xl hover:border-cyan-500/30 transition-all duration-300">
               <div className="w-12 h-12 bg-cyan-500/20 rounded-xl flex items-center justify-center shrink-0 border border-cyan-500/30">
                 <Brain className="text-cyan-400" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white mb-1">Branch</h3>
-                <p className="text-gray-300 font-semibold text-base">Data Science</p>
-                <p className="text-xs text-cyan-400 font-semibold mt-1">SkillForge — VIIT Chapter</p>
+                <h3 className="text-xl font-bold text-white">Department of Data Science</h3>
               </div>
             </div>
 

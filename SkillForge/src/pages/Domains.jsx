@@ -37,15 +37,7 @@ const domainsList = [
     Icon: Database,
     resourceLink: 'https://roadmap.sh/data-analyst',
     resourceLabel: 'Data Analyst Roadmap'
-  },
-  {
-    title: "DBMS",
-    description: "Learn database design, SQL, normalization, indexing, transactions, and database management systems.",
-    detailedDescription:'Build a strong foundation in Database Management Systems by learning SQL, relational databases, normalization, transactions, indexing, and real-world database design for modern applications.',
-    Icon: Database,
-    resourceLink: 'https://www.oracle.com/in/education/training/database/',
-    resourceLabel:'DBMS course Link'
-}
+  }
 ];
 
 const dsaPatterns = [
@@ -122,7 +114,7 @@ const Domains = () => {
         </p>
       </div>
 
-      <CardGrid columns={5}>
+      <CardGrid columns={4}>
         {domainsList.map((domain, index) => (
           <DomainCard
             key={index}
@@ -274,148 +266,6 @@ const Domains = () => {
             </div>
           </div>
         </motion.div>
-        {/* dbms  */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6 }}
-          className=" mt-10 glass-card rounded-[2.5rem] overflow-hidden p-8 md:p-12 border border-white/10 shadow-[0_0_50px_rgba(6,182,212,0.05)] bg-slate-950/40 backdrop-blur-xl"
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-            {/* Left Info Column */}
-            <div className="lg:col-span-5 flex flex-col justify-between space-y-6">
-              <div>
-                <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-6 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
-                  <Database className="w-8 h-8 text-cyan-400" />
-                </div>
-                <span className="text-cyan-400 text-xs font-extrabold uppercase tracking-widest bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-full">
-                  Specialized Training
-                </span>
-                <h3 className="text-3xl md:text-4xl font-black text-white mt-4 leading-tight font-sans">
-                  Database Management Systems (DBMS)
-                </h3>
-                <p className="text-slate-400 text-base leading-relaxed mt-4">
-                  Build a strong foundation in Database Management Systems by learning SQL, relational databases, normalization, indexing, transactions, and query optimization. Gain hands-on experience designing efficient and scalable databases for real-world applications.
-              </p>
-              </div>
-              <div className="space-y-4 pt-4 border-t border-white/5">
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-                    <Zap size={12} className="fill-current" />
-                  </div>
-                  <span className="text-slate-300 text-sm font-semibold">Structured DBMS learning modules</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-                    <Zap size={12} className="fill-current" />
-                  </div>
-                  <span className="text-slate-300 text-sm font-semibold">Hands-on SQL & database design practice</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-                    <Zap size={12} className="fill-current" />
-                  </div>
-                  <span className="text-slate-300 text-sm font-semibold">Real-world database projects & interview preparation</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Topics Grid Column */}
-            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-  {
-    title: "Database Fundamentals",
-    topics: [
-      "Introduction to DBMS",
-      "ER Model & ER Diagrams",
-      "Relational Model"
-    ],
-    borderColor: "border-blue-500/20"
-  },
-  {
-    title: "SQL Programming",
-    topics: [
-      "DDL, DML & DCL Commands",
-      "Joins & Subqueries",
-      "Views & Functions"
-    ],
-    borderColor: "border-cyan-500/20"
-  },
-  {
-    title: "Database Design",
-    topics: [
-      "Normalization (1NF–BCNF)",
-      "Functional Dependencies",
-      "Schema Design"
-    ],
-    borderColor: "border-purple-500/20"
-  },
-  {
-    title: "Advanced DBMS",
-    topics: [
-      "Transactions & ACID",
-      "Indexing",
-      "Concurrency Control"
-    ],
-    borderColor: "border-indigo-500/20"
-              }
-              ].map((group, idx) => (
-                <div 
-                  key={idx}
-                  className={`bg-slate-900/40 backdrop-blur-sm border ${group.borderColor} rounded-2xl p-5 hover:border-white/20 transition-all flex flex-col justify-between`}
-                >
-                  <div>
-                    <h4 className="text-white font-bold text-lg mb-3 flex items-center gap-2">
-                      <Terminal size={16} className="text-cyan-400" /> {group.title}
-                    </h4>
-                    <ul className="space-y-2">
-                      {group.topics.map((t, i) => (
-                        <li key={i} className="text-slate-400 text-xs sm:text-sm flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-500/50 shrink-0" />
-                          {t}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Bottom Resource Links Banner */}
-          <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <BookMarked className="text-cyan-400 w-6 h-6 shrink-0" />
-              <div>
-                <h4 className="text-white font-bold text-sm sm:text-base">Ready to master databases?</h4>
-                <p className="text-slate-400 text-xs sm:text-sm">Explore SQL tutorials, DBMS roadmaps, and practice platforms to strengthen your database skills.</p>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-             {/* <button
-                onClick={() => setShowDsaRoadmap(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:opacity-90 rounded-xl text-slate-950 text-xs sm:text-sm font-black transition-all cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.25)]"
-              >
-                DSA Interactive Roadmap
-                <Zap size={12} className="fill-current" />
-              </button>
-              */}
-              {dbmsResources.map((res, idx) => (
-                <a
-                  key={idx}
-                  href={res.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900/60 hover:bg-slate-800/80 border border-white/10 rounded-xl text-cyan-400 hover:text-cyan-300 text-xs sm:text-sm font-bold transition-all"
-                >
-                  {res.title}
-                  <ExternalLink size={12} />
-                </a>
-              ))}
-            </div>
-          </div>
-        </motion.div>
         {/* Language Programming Section */}
         <div className="mt-20 text-center mb-12">
           <h3 className="text-2xl md:text-3xl font-black flex items-center justify-center mb-4">
@@ -424,11 +274,11 @@ const Domains = () => {
             </span>
           </h3>
           <p className="text-gray-400 text-sm max-w-xl mx-auto font-medium">
-            Acquire solid coding fundamentals with our structured courses in key programming languages.
+            Acquire solid coding fundamentals with our structured courses in key programming languages and database systems.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             {
               title: "C Programming",
@@ -470,6 +320,21 @@ const Domains = () => {
               resources: [
                 { label: "Java Developer Roadmap", url: "https://roadmap.sh/java" },
                 { label: "Java Structure Mind Map", url: "https://java-design-patterns.com/" }
+              ]
+            },
+            {
+              title: "DBMS",
+              desc: "Learn SQL, relational databases, normalization, indexing, transactions, and query optimization for scalable apps.",
+              detailedDescription: "Build a strong foundation in Database Management Systems by learning SQL, relational databases, normalization, transactions, indexing, and real-world database design for modern applications.",
+              borderColor: "border-cyan-500/20",
+              glowColor: "shadow-[0_0_20px_rgba(6,182,212,0.08)]",
+              features: ["SQL & Query Design", "Normalization & ER Models", "Transactions & Indexing"],
+              Icon: Database,
+              subtitle: "Database Management",
+              resources: [
+                { label: "SQLBolt Tutorial", url: "https://sqlbolt.com" },
+                { label: "W3Schools SQL", url: "https://www.w3schools.com/sql/" },
+                { label: "GeeksforGeeks DBMS", url: "https://www.geeksforgeeks.org/dbms/" }
               ]
             }
           ].map((lang, idx) => (
