@@ -5,10 +5,10 @@ import { Linkedin, Youtube, Facebook, Instagram, Mail, MapPin, ChevronRight } fr
 import logoImage from '../assets/logo.png';
 
 const socialLinks = [
-  { icon: Linkedin,  href: "https://www.linkedin.com/company/skillforge-ds-viit",            label: "LinkedIn",  color: "hover:text-blue-400"   },
-  { icon: Youtube,   href: "https://youtube.com/@skillforge_viit",                        label: "YouTube",   color: "hover:text-red-400"    },
-  { icon: Facebook,  href: "https://www.facebook.com/share/1BdvqBredR/",                  label: "Facebook",  color: "hover:text-blue-500"   },
-  { icon: Instagram, href: "https://www.instagram.com/skillforge_viit?utm_source=qr&igsh=czRiY2FtcnU0Zm9z", label: "Instagram", color: "hover:text-pink-400"   },
+  { icon: Linkedin,  href: "https://www.linkedin.com/company/skillforge-ds-viit/posts/?feedView=all", label: "LinkedIn",  color: "hover:text-blue-400"   },
+  { icon: Youtube,   href: "https://youtube.com/@skillforge_viit",                                   label: "YouTube",   color: "hover:text-red-400"    },
+  { icon: Facebook,  href: "https://www.facebook.com/skillforege.club?rdid=m0IR3DEGZ39hQIQl&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1EGkuGC7Ap%2F#", label: "Facebook", color: "hover:text-blue-500" },
+  { icon: Instagram, href: "https://www.instagram.com/skillforge_viit?igsh=czRiY2FtcnU0Zm9z",       label: "Instagram", color: "hover:text-pink-400"   },
 ];
 
 const navLinks = [

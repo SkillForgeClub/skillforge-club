@@ -179,16 +179,16 @@ const Contact = () => {
               </div>
 
               <div className="flex flex-wrap gap-2.5 pt-2 w-full">
-                <a href="https://www.linkedin.com/company/skillforge-ds-viit" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-blue-600/20 text-gray-300 hover:text-blue-400 border border-white/10 hover:border-blue-500/30 text-xs font-bold transition-all duration-200">
+                <a href="https://www.linkedin.com/company/skillforge-ds-viit/posts/?feedView=all" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-blue-600/20 text-gray-300 hover:text-blue-400 border border-white/10 hover:border-blue-500/30 text-xs font-bold transition-all duration-200">
                   <Linkedin className="w-4 h-4 text-blue-400" /> LinkedIn
                 </a>
                 <a href="https://youtube.com/@skillforge_viit?si=CNGftmeEVKPEv-AY" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-red-600/20 text-gray-300 hover:text-red-400 border border-white/10 hover:border-red-500/30 text-xs font-bold transition-all duration-200">
                   <Youtube className="w-4 h-4 text-red-500" /> YouTube
                 </a>
-                <a href="https://www.facebook.com/share/1BdvqBredR/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-blue-600/20 text-gray-300 hover:text-blue-400 border border-white/10 hover:border-blue-500/30 text-xs font-bold transition-all duration-200">
+                <a href="https://www.facebook.com/skillforege.club?rdid=m0IR3DEGZ39hQIQl&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1EGkuGC7Ap%2F#" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-blue-600/20 text-gray-300 hover:text-blue-400 border border-white/10 hover:border-blue-500/30 text-xs font-bold transition-all duration-200">
                   <Facebook className="w-4 h-4 text-blue-500" /> Facebook
                 </a>
-                <a href="https://www.instagram.com/skillforge_viit?utm_source=qr&igsh=czRiY2FtcnU0Zm9z" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-pink-600/20 text-gray-300 hover:text-pink-400 border border-white/10 hover:border-pink-500/30 text-xs font-bold transition-all duration-200">
+                <a href="https://www.instagram.com/skillforge_viit?igsh=czRiY2FtcnU0Zm9z" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-pink-600/20 text-gray-300 hover:text-pink-400 border border-white/10 hover:border-pink-500/30 text-xs font-bold transition-all duration-200">
                   <Instagram className="w-4 h-4 text-pink-400" /> Instagram
                 </a>
               </div>

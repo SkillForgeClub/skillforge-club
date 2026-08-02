@@ -152,38 +152,39 @@ const DashboardLayout = React.memo(({ menuItems = [], role = "User" }) => {
         <div className="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-purple-500/5 rounded-full blur-[60px] pointer-events-none z-0" />
 
         {/* Top Header Bar Matching User Image 1 */}
-        <header className="h-20 lg:h-24 flex items-center justify-between px-4 sm:px-6 lg:px-8 border-b border-white/10 relative z-20 bg-[#070d1f]/90 backdrop-blur-md shadow-md">
-          <div className="flex items-center gap-4">
-            <button onClick={toggleSidebar} className="p-2 rounded-lg bg-white/5 text-slate-300 hover:bg-white/10 lg:hidden">
-              <Menu className="w-6 h-6" />
+        <header className="min-h-[4.5rem] sm:h-20 lg:h-24 py-2.5 sm:py-0 flex items-center justify-between px-3 sm:px-6 lg:px-8 border-b border-white/10 relative z-20 bg-[#070d1f]/90 backdrop-blur-md shadow-md gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+            <button onClick={toggleSidebar} className="p-2 rounded-lg bg-white/5 text-slate-300 hover:bg-white/10 lg:hidden flex-shrink-0" aria-label="Toggle Menu">
+              <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
 
             {/* Welcome Greeting Section */}
-            <div>
-              <h1 className="text-xl sm:text-2xl font-extrabold text-white flex items-center gap-2">
-                Welcome back, {nameToShow}! 👋
+            <div className="min-w-0 flex-1">
+              <h1 className="text-sm sm:text-xl lg:text-2xl font-extrabold text-white flex items-center gap-1.5 whitespace-nowrap overflow-hidden text-ellipsis">
+                <span className="truncate">Welcome back, {nameToShow}!</span>
+                <span className="flex-shrink-0">👋</span>
               </h1>
-              <p className="text-xs sm:text-sm text-slate-400 font-medium hidden sm:block mt-0.5">
+              <p className="text-xs sm:text-sm text-slate-400 font-medium hidden sm:block mt-0.5 truncate">
                 Keep learning, keep growing. You're doing great!
               </p>
             </div>
           </div>
 
           {/* Header Right Actions */}
-          <div className="flex items-center gap-3 sm:gap-4">
-            <Link to="/" className="p-2.5 rounded-full bg-[#0d1633] text-cyan-400 hover:bg-white/10 hover:text-cyan-300 border border-white/10 transition-colors" title="Back to Home">
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+            <Link to="/" className="p-2 sm:p-2.5 rounded-full bg-[#0d1633] text-cyan-400 hover:bg-white/10 hover:text-cyan-300 border border-white/10 transition-colors flex-shrink-0" title="Back to Home">
               <Home className="w-4 h-4" />
             </Link>
 
             {/* Profile Pill Card */}
-            <div className="flex items-center gap-2.5 bg-[#0c1633] border border-white/10 hover:border-cyan-500/40 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full cursor-pointer hover:bg-[#132048] transition-all shadow-md">
-              <div className="w-8 h-8 rounded-full bg-[#009bf2] text-white flex items-center justify-center font-bold text-sm shadow-md ring-2 ring-cyan-400/20 flex-shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2.5 bg-[#0c1633] border border-white/10 hover:border-cyan-500/40 px-2.5 py-1 sm:px-4 sm:py-2 rounded-full cursor-pointer hover:bg-[#132048] transition-all shadow-md flex-shrink-0">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#009bf2] text-white flex items-center justify-center font-bold text-xs sm:text-sm shadow-md ring-2 ring-cyan-400/20 flex-shrink-0">
                 {initials}
               </div>
               <span className="text-sm font-semibold text-white hidden sm:inline-block">
                 {fullUserTitle}
               </span>
-              <span className="text-[0.65rem] text-[#00d8ff] font-extrabold tracking-wider uppercase bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full">
+              <span className="text-[0.6rem] sm:text-[0.65rem] text-[#00d8ff] font-extrabold tracking-wider uppercase bg-cyan-500/10 border border-cyan-500/20 px-1.5 py-0.5 sm:px-2 rounded-full">
                 {role === "Student" ? "STUDENT" : role.toUpperCase()}
               </span>
             </div>
