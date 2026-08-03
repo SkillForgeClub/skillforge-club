@@ -57,16 +57,28 @@ const ALUMNI_DATA = [
   },
   {
     id: 3,
-    name: "Karthik Reddy",
-    role: "AI Researcher @ OpenAI",
+    name: "Malla Sravan Kumar",
+    role: "Software Developer",
     batch: "Class of 2026",
     department: "CSE - Data Science",
-    image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=500&q=80",
-    bio: "Deep learning enthusiast working on generative AI and reasoning models. Spent my college years heavily invested in data science hackathons.",
-    message: "Math is more important than you think. Don't skip your linear algebra, calculus, and statistics classes. The AI field moves fast, but the foundational math remains exactly the same.",
+    image: "https://res.cloudinary.com/jd4zqkel/image/upload/v1785739987/WhatsApp_Image_2026-08-03_at_12.21.37_PM_l9tuhi.jpg",
+    objectPosition: "center 20%",
+    bio: "I am a 2026 B.Tech graduate in Computer Science and Engineering (Data Science) from Vignan's Institute of Information Technology. I am passionate about software development, Artificial Intelligence, Data Science, and emerging technologies. I enjoy building innovative applications, solving real-world problems, and continuously learning new skills. Being a part of the first alumni batch of the CSE (Data Science) program has been a matter of pride, and I look forward to staying connected with the VIIT alumni community while contributing to its growth.",
+    btechJourney: "My B.Tech journey has been a transformative experience that helped me grow both technically and personally. Throughout my time at VIIT, I actively participated in technical events, hackathons, coding competitions, workshops, internships, and community activities that strengthened my problem-solving, leadership, and teamwork skills.\n\nI continuously explored new technologies, worked on real-world projects, and focused on improving my technical knowledge in software development, Artificial Intelligence, and Data Science. Along with academics, I enjoyed collaborating with friends, learning from faculty, and creating memorable experiences that shaped both my personal and professional growth.\n\nEvery experience throughout my B.Tech played a significant role in shaping the person I am today.",
+    interests: [
+      "Artificial Intelligence & Data Science",
+      "Software Development",
+      "Full-Stack Web Development",
+      "Python, SQL & JavaScript",
+      "Problem Solving & Competitive Programming",
+      "Leadership & Community Building",
+      "Hackathons & Technical Events",
+      "Continuous Learning & Innovation"
+    ],
+    message: "Make the most of every opportunity your B.Tech offers because these four years will shape your future in countless ways. Don't limit yourself to classroom learning—explore new technologies, build meaningful projects, participate in hackathons, internships, technical communities, and college events. Step out of your comfort zone, stay curious, and never stop learning.\n\nFocus on building strong fundamentals, improving your communication skills, and being consistent in your efforts. Remember, success is not about being perfect; it's about continuously improving yourself and making the best use of every opportunity that comes your way. All the best!",
     social: {
-      linkedin: "#",
-      github: "#"
+      linkedin: "https://www.linkedin.com/in/sravankumar-malla",
+      github: "https://github.com/SravanKuamarMalla999"
     }
   }
 ];
